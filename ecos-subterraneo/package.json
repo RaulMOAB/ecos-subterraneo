@@ -11,9 +11,12 @@
     "format": "prettier --write ."
   },
   "dependencies": {
-    "vue": "^3.5.22"
+    "@studio-freight/lenis": "^1.0.42",
+    "vue": "^3.5.22",
+    "vue-router": "^4.6.3"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.17",
     "@vitejs/plugin-vue": "^6.0.1",
     "autoprefixer": "^10.4.21",
     "postcss": "^8.5.6",
