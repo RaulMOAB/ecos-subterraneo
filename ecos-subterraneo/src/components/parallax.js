@@ -4,6 +4,7 @@ export function useParallax(props) {
   const layerStyle = (layer) => ({
     zIndex: layer.zIndex || 1,
     opacity: layer.opacity ?? 1,
+    mixBlendMode: layer.blendMode || 'normal',
   })
 
   let ticking = false

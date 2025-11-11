@@ -12,14 +12,18 @@
   inset: 0;
   will-change: transform;
   transform: translate3d(0, 0, 0);
+  pointer-events: none;
 }
 
 .parallax-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center bottom;
   pointer-events: none;
   display: block;
+  transform: scale(1.08);
+  filter: saturate(1.05);
 }
 
 .parallax-slot {
