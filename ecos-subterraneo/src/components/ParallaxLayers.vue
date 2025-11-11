@@ -1,11 +1,7 @@
 <template>
-  <section
-    class="parallax-scene"
-    :style="{ height }"
-    aria-label="Parallax scene"
-  >
+  <section ref="sceneRef" class="parallax-scene" aria-label="Parallax scene">
     <div
-      v-for="(layer, i) in layers"
+      v-for="(layer, i) in props.layers"
       :key="i"
       class="parallax-layer"
       :style="layerStyle(layer)"
@@ -17,20 +13,34 @@
         draggable="false"
       />
     </div>
-    <div class="parallax-slot"><slot /></div>
+    <div class="parallax-dark-overlay" aria-hidden="true"></div>
+    <!--capa oscura-->
+    <div class="parallax-slot">
+      <slot />
+    </div>
   </section>
 </template>
 
 <script setup>
 import '@/styles/parallax.css'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useParallax } from './parallax.js'
 
 const props = defineProps({
   layers: { type: Array, required: true },
-  height: { type: String, default: '120vh' },
-  strength: { type: Number, default: 1 },
+  strength: { type: Number, default: 2.0 },
   clamp: { type: Boolean, default: true },
+  lerp: { type: Number, default: 0.28 },
 })
 
-const { layerStyle } = useParallax(props)
+const sceneRef = ref(null)
+const { layerStyle, initParallax, destroyParallax } = useParallax(props)
+
+onMounted(() => {
+  initParallax(sceneRef)
+})
+
+onUnmounted(() => {
+  destroyParallax()
+})
 </script>

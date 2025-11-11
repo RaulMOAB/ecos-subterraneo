@@ -1,5 +1,11 @@
 <template>
-  <ParallaxLayers :layers="layers" height="120vh" :strength="1" :clamp="true">
+  <ParallaxLayers
+    :layers="layers"
+    :strength="1.5"
+    :clamp="true"
+    :lerp="0.28"
+    class="hero-parallax"
+  >
     <article class="hero" aria-labelledby="hero-title">
       <div class="hero-backdrop" aria-hidden="true"></div>
       <div class="hero-content">

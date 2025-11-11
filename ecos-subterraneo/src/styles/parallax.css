@@ -1,36 +1,62 @@
+/* parallax.css */
+
 .parallax-scene {
   position: relative;
-  overflow: hidden;
   width: 100%;
-  height: 100vh; /* valor por defecto, la vista puede sobreescribirlo con :style="{height}" */
-  contain: layout paint;
-  background: #0b0f14;
+  aspect-ratio: 16 / 9;
+  max-height: 100vh;
+  margin: 0 auto;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
+/* cada capa ocupa todo el contenedor */
 .parallax-layer {
   position: absolute;
   inset: 0;
   will-change: transform;
-  transform: translate3d(0, 0, 0);
-  pointer-events: none;
+  backface-visibility: hidden;
 }
 
+/* la imagen rellena el lienzo 16:9 sin deformarse */
 .parallax-img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  object-position: center bottom;
+  object-fit: cover; /* como todas son 16:9, no se deforman */
+  transform: translate3d(0, 0, 0);
   pointer-events: none;
-  display: block;
-  transform: scale(1.08);
-  filter: saturate(1.05);
+  user-select: none;
 }
 
 .parallax-slot {
   position: relative;
-  z-index: 50;
+  z-index: 10;
+  width: 100%;
   display: flex;
-  align-items: center;
   justify-content: center;
-  height: 100%;
+}
+
+.parallax-dark-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 5; /* por encima de las capas (zIndex 1–3), por debajo del slot (z-index 10) */
+  pointer-events: none;
+
+  /* capa oscura suave, con un poquito de gradiente */
+  background: radial-gradient(
+      circle at 20% 20%,
+      rgba(255, 255, 255, 0.05) 0,
+      transparent 40%
+    ),
+    linear-gradient(
+      to bottom,
+      rgba(2, 4, 12, 0.4) 0%,
+      rgba(2, 4, 12, 0.5) 40%,
+      rgba(2, 4, 12, 0.5) 100%
+    );
+  mix-blend-mode: normal;
 }
