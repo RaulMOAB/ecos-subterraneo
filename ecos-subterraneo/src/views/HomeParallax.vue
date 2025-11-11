@@ -12,7 +12,7 @@ import PathScroll from '@/components/PathScroll.vue'
   <PathScroll />
 
   <!-- Sections -->
-  <main class="relative z-20">
+  <main id="inicio" class="relative z-20">
     <Section title="Entrada a la Torre Invertida">
       Bienvenida/o a la galería. Desplázate para descender.
     </Section>
