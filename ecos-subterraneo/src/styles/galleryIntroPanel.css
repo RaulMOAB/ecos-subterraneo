@@ -1,0 +1,161 @@
+/* Contenedor del panel */
+.gi-panel {
+  position: relative;
+  margin: clamp(16px, 4vw, 28px) auto 0;
+  max-width: 1100px;
+  padding-inline: clamp(12px, 3vw, 16px);
+}
+
+/* Caja visible cuando está abierto */
+.gi-panel[data-open='true'] .gi-wrap {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+.gi-panel[data-open='false'] .gi-wrap {
+  opacity: 0;
+  transform: translateY(-6px);
+  pointer-events: none;
+}
+
+/* Caja principal */
+.gi-wrap {
+  transition: opacity 180ms ease, transform 220ms ease;
+  background: linear-gradient(
+      180deg,
+      rgba(12, 16, 26, 0.85),
+      rgba(8, 10, 18, 0.92)
+    ),
+    radial-gradient(
+      120% 120% at 8% 8%,
+      rgba(255, 255, 255, 0.06),
+      transparent 60%
+    );
+  border: 1px solid rgba(140, 180, 255, 0.14);
+  box-shadow: 0 36px 100px rgba(5, 6, 15, 0.65);
+  border-radius: 18px;
+  padding: clamp(16px, 3vw, 24px);
+  color: #e9eeff;
+}
+
+/* Cabecera */
+.gi-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: clamp(10px, 2vw, 14px);
+}
+.gi-title {
+  margin: 0;
+  font-family: 'Cinzel Decorative', system-ui, -apple-system, BlinkMacSystemFont,
+    'Segoe UI', sans-serif;
+  font-size: clamp(1.4rem, 3.2vw, 2.1rem);
+  letter-spacing: 0.02em;
+  text-shadow: 0 10px 30px rgba(4, 5, 10, 0.45);
+}
+.gi-close {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: #cfe0ff;
+  font-size: 26px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+/* Grid interno */
+.gi-grid {
+  display: grid;
+  gap: clamp(14px, 3vw, 20px);
+  grid-template-columns: 1fr;
+}
+@media (min-width: 900px) {
+  .gi-grid {
+    grid-template-columns: 1fr 1.4fr;
+    align-items: center;
+  }
+}
+
+/* Figura izquierda */
+.gi-figure {
+  display: grid;
+  place-items: center;
+  background: radial-gradient(
+    60% 60% at 50% 45%,
+    rgba(255, 255, 255, 0.05),
+    transparent 65%
+  );
+  border-radius: 14px;
+  min-height: 220px;
+  padding: clamp(10px, 2vw, 16px);
+  overflow: hidden;
+}
+.gi-figure img,
+.gi-figure svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  filter: drop-shadow(0 10px 28px rgba(0, 0, 0, 0.4));
+}
+
+/* Texto derecha */
+.gi-content {
+  display: grid;
+  gap: 12px;
+}
+.gi-desc {
+  margin: 0;
+  line-height: 1.65;
+  color: rgba(226, 235, 255, 0.86);
+}
+
+/* Acciones */
+.gi-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 6px;
+}
+.gi-cta {
+  appearance: none;
+  border: 0;
+  cursor: pointer;
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-weight: 700;
+  color: #0b0f14;
+  background: linear-gradient(135deg, #ffe666 0%, #ffb347 100%);
+  box-shadow: 0 12px 30px rgba(255, 191, 69, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+.gi-cta:hover {
+  transform: translateY(-1px);
+}
+.gi-ghost {
+  appearance: none;
+  border: 1px solid rgba(140, 180, 255, 0.25);
+  background: rgba(15, 20, 33, 0.6);
+  color: #cfe0ff;
+  padding: 10px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.gi-ghost:hover {
+  border-color: rgba(140, 180, 255, 0.45);
+}
+
+/* Barra “reabrir” cuando está colapsado */
+.gi-reopen {
+  margin-top: 10px;
+  width: 100%;
+  appearance: none;
+  border: 1px dashed rgba(140, 180, 255, 0.25);
+  background: rgba(15, 20, 33, 0.5);
+  color: #cfe0ff;
+  padding: 10px 14px;
+  border-radius: 12px;
+  cursor: pointer;
+}
+.gi-reopen:hover {
+  border-color: rgba(140, 180, 255, 0.45);
+}

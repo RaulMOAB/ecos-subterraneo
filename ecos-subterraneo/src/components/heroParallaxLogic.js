@@ -16,7 +16,7 @@ export function useHeroParallax() {
       src: mid,
       alt: 'Rocas y raíces',
       depth: 1.1, // capa media
-      zIndex: 2,
+      zIndex: 12,
       offsetY: 0,
       opacity: 0.98,
     },
@@ -24,7 +24,7 @@ export function useHeroParallax() {
       src: fg,
       alt: 'Colmena subterránea',
       depth: 1.8, // primer plano, se mueve más
-      zIndex: 3,
+      zIndex: 14,
       offsetY: 0,
       opacity: 1,
     },

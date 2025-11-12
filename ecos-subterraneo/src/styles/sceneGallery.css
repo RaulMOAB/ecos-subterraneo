@@ -1,0 +1,222 @@
+:root {
+  --row-gap: clamp(80px, 12vh, 160px);
+  --side-gutter: clamp(24px, 5vw, 64px);
+  --card-max: min(1000px, 94vw);
+  --card-open: min(1100px, 92vw);
+  --media-ratio: 4 / 3;
+}
+
+/* Contenedor general */
+.scene-gallery {
+  display: grid;
+  grid-template-columns: 1fr;
+  row-gap: var(--row-gap);
+  padding-inline: var(--side-gutter);
+  width: 100%;
+  justify-items: stretch;
+  padding-top: 2rem;
+}
+.scene-card:last-child {
+  margin-bottom: 8rem;
+}
+.scene-card:last-child.is-open {
+  margin-bottom: 10rem;
+}
+
+/* =========================================================
+   Card (cerrada)
+   ========================================================= */
+.scene-card {
+  width: 100%;
+  max-width: var(--card-max);
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(14px, 2vw, 18px);
+  transition: width 0.35s ease;
+}
+
+/* ---------- Zigzag automático ---------- */
+@media (min-width: 900px) {
+  .scene-card:nth-child(odd) {
+    justify-self: start; /* izquierda */
+  }
+  .scene-card:nth-child(even) {
+    justify-self: end; /* derecha */
+  }
+  .scene-card.is-center {
+    justify-self: center; /* última centrada */
+  }
+}
+
+/* =========================================================
+   Imagen cerrada
+   ========================================================= */
+.scene-media {
+  position: relative;
+  aspect-ratio: var(--media-ratio);
+  border-radius: 18px;
+  overflow: hidden;
+  background: #0b0f14;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+}
+.scene-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transform: scale(1.03);
+  transition: transform 0.35s ease-out;
+}
+.scene-media:hover .scene-img {
+  transform: scale(1.06);
+}
+
+/* CTA bajo la imagen (cerrada) */
+.scene-controls {
+  display: flex;
+  justify-content: center;
+}
+.scene-cta {
+  border: 0;
+  border-radius: 999px;
+  padding: 14px 22px;
+  font-weight: 700;
+  cursor: pointer;
+  color: #0b0f14;
+  background: linear-gradient(135deg, #ffe666 0%, #ffb347 100%);
+  box-shadow: 0 12px 30px rgba(255, 191, 69, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  transition: transform 0.15s ease;
+}
+.scene-cta:hover {
+  transform: translateY(-1px);
+}
+
+/* =========================================================
+   Recuadro de escena abierta
+   ========================================================= */
+.scene-frame {
+  width: 100%;
+  max-width: var(--card-open);
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(14px, 2vw, 18px);
+  padding: clamp(14px, 2vw, 20px);
+  border-radius: 16px;
+  border: 1px solid rgba(140, 180, 255, 0.12);
+  background: linear-gradient(
+      180deg,
+      rgba(12, 16, 26, 0.7),
+      rgba(8, 10, 18, 0.84)
+    ),
+    radial-gradient(
+      120% 120% at 8% 8%,
+      rgba(255, 255, 255, 0.05),
+      transparent 60%
+    );
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
+}
+
+/* Imagen dentro del recuadro */
+.frame-media {
+  aspect-ratio: var(--media-ratio);
+  border-radius: 14px;
+  overflow: hidden;
+  background: #0b0f14;
+}
+.frame-content {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* =========================================================
+   Layout abierto — dos columnas (desktop)
+   ========================================================= */
+@media (min-width: 900px) {
+  .scene-frame {
+    grid-template-columns: 1fr 1fr;
+    align-items: stretch;
+    column-gap: clamp(16px, 2.2vw, 28px);
+  }
+
+  /* Zigzag alterno: cambio de orden */
+  .scene-card:nth-child(odd) .frame-media {
+    order: 1;
+  }
+  .scene-card:nth-child(odd) .frame-content {
+    order: 2;
+  }
+
+  .scene-card:nth-child(even) .frame-media {
+    order: 2;
+  }
+  .scene-card:nth-child(even) .frame-content {
+    order: 1;
+  }
+
+  /* Última centrada: columna única */
+  .scene-card.is-center .scene-frame {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================================================
+   Tipografía y botones del panel
+   ========================================================= */
+.scene-header {
+  display: grid;
+  gap: 4px;
+}
+.scene-title {
+  margin: 0;
+  font-family: 'Cinzel Decorative', serif;
+  font-size: clamp(1.25rem, 2.2vw, 1.8rem);
+  letter-spacing: 0.02em;
+  color: #f5f7ff;
+  text-shadow: 0 10px 30px rgba(4, 5, 10, 0.4);
+}
+.scene-kicker {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.78rem;
+  color: rgba(172, 211, 255, 0.76);
+}
+.scene-desc {
+  margin-top: 0.5rem;
+  line-height: 1.65;
+  color: rgba(226, 235, 255, 0.92);
+}
+
+/* Botones dentro del panel */
+.panel-ctas {
+  margin-top: auto;
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+.sc-btn {
+  border: 0;
+  border-radius: 999px;
+  padding: 10px 14px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.sc-ghost {
+  border: 1px solid rgba(140, 180, 255, 0.25);
+  background: rgba(15, 20, 33, 0.6);
+  color: #cfe0ff;
+}
+.sc-primary {
+  color: #0b0f14;
+  background: linear-gradient(135deg, #ffe666 0%, #ffb347 100%);
+  box-shadow: 0 12px 30px rgba(255, 191, 69, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+.sc-primary:hover {
+  transform: translateY(-1px);
+}

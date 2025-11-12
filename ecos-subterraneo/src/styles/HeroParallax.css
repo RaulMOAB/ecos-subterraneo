@@ -41,6 +41,9 @@
   display: grid;
   gap: 1.25rem;
   text-align: center;
+  text-align: center;
+  justify-items: center;
+  max-width: 38rem;
 }
 
 .hero-kicker {
@@ -68,7 +71,7 @@
 
 .hero-sub {
   margin: 0;
-  max-width: 40ch;
+  max-width: 47ch;
   justify-self: center;
   color: rgba(226, 235, 255, 0.85);
   line-height: 1.6;
@@ -80,7 +83,7 @@
   justify-content: center;
   justify-self: center;
   width: fit-content;
-  padding: 0.75rem 1.75rem;
+  padding: 0.75rem 2rem;
   border-radius: 999px;
   font-weight: 600;
   text-decoration: none;
@@ -89,6 +92,7 @@
   box-shadow: 0 12px 30px rgba(255, 191, 69, 0.45),
     inset 0 1px 0 rgba(255, 255, 255, 0.35);
   transition: transform 200ms ease, box-shadow 200ms ease;
+  margin-top: 1rem;
 }
 
 .hero-cta:hover,
