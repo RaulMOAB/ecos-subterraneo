@@ -16,6 +16,7 @@
   justify-items: stretch;
   padding-top: 2rem;
 }
+
 .scene-card:last-child {
   margin-bottom: 8rem;
 }
@@ -24,16 +25,18 @@
 }
 
 /* =========================================================
-   Card (cerrada)
+   Card (cerrada / abierta) – ancho base
    ========================================================= */
 .scene-card {
   width: 100%;
-  max-width: var(--card-max);
+  max-width: var(--card-max); /* ancho de la escena cerrada */
   margin: 0;
   display: grid;
   grid-template-columns: 1fr;
   gap: clamp(14px, 2vw, 18px);
   transition: width 0.35s ease;
+  position: relative; /* referencia para el panel lateral */
+  overflow: visible;
 }
 
 /* ---------- Zigzag automático ---------- */
@@ -99,11 +102,8 @@
    ========================================================= */
 .scene-frame {
   width: 100%;
-  max-width: var(--card-open);
+  max-width: 100%;
   margin: 0;
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: clamp(14px, 2vw, 18px);
   padding: clamp(14px, 2vw, 20px);
   border-radius: 16px;
   border: 1px solid rgba(140, 180, 255, 0.12);
@@ -118,49 +118,110 @@
       transparent 60%
     );
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(14px, 2vw, 18px);
 }
 
-/* Imagen dentro del recuadro */
+/* Imagen dentro del recuadro – sigue ocupando todo el ancho */
 .frame-media {
   aspect-ratio: var(--media-ratio);
   border-radius: 14px;
   overflow: hidden;
   background: #0b0f14;
 }
+
+.frame-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .frame-content {
   min-height: 100%;
   display: flex;
   flex-direction: column;
+  margin-top: 1.25rem; /* por defecto, debajo (móvil / tablet) */
 }
 
 /* =========================================================
-   Layout abierto — dos columnas (desktop)
+   Panel lateral en escritorio – mantiene tamaño de escena
    ========================================================= */
+@media (min-width: 1100px) {
+  /* escena abierta: el contenido se convierte en panel lateral */
+  .scene-card.is-open .frame-content {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%) translateX(16px);
+    width: min(360px, 26vw);
+    max-width: 360px;
+    margin-top: 0;
+  }
+
+  /* Odd → panel a la derecha de la escena */
+  .scene-card.is-open:nth-child(odd) .frame-content {
+    left: calc(100% + 2rem);
+    right: auto;
+  }
+
+  /* Even → panel a la izquierda */
+  .scene-card.is-open:nth-child(even) .frame-content {
+    right: calc(100% + 2rem);
+    left: auto;
+    transform: translateY(-50%) translateX(-16px);
+  }
+
+  /* Última centrada: panel debajo para evitar cortes */
+  .scene-card.is-open.is-center .frame-content {
+    position: static;
+    transform: none;
+    width: 100%;
+    margin-top: 1.5rem;
+  }
+}
+
+/* En pantallas menores, panel debajo de la imagen (stack) */
+@media (max-width: 1099px) {
+  .scene-card.is-open .frame-content {
+    position: static;
+    width: 100%;
+    margin-top: 1.5rem;
+    transform: none;
+  }
+}
+
+/* Layout abierto — imagen + texto dentro de scene-frame */
 @media (min-width: 900px) {
-  .scene-frame {
-    grid-template-columns: 1fr 1fr;
+  /* Escena abierta = frame se convierte en fila flex */
+  .scene-card.is-open .scene-frame {
+    display: flex;
     align-items: stretch;
-    column-gap: clamp(16px, 2.2vw, 28px);
+    column-gap: clamp(24px, 3vw, 40px);
   }
 
-  /* Zigzag alterno: cambio de orden */
-  .scene-card:nth-child(odd) .frame-media {
-    order: 1;
+  /* La imagen mantiene el tamaño de la escena cerrada */
+  .scene-card.is-open .frame-media {
+    flex: 0 0 var(--card-max); /* ancho fijo de la imagen */
+    max-width: var(--card-max);
   }
-  .scene-card:nth-child(odd) .frame-content {
+
+  .scene-card.is-open .frame-content {
+    flex: 1 1 0; /* el texto ocupa el espacio extra */
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Zigzag: escenas pares con texto a la izquierda */
+  .scene-card.is-open:nth-child(even) .frame-media {
     order: 2;
   }
-
-  .scene-card:nth-child(even) .frame-media {
-    order: 2;
-  }
-  .scene-card:nth-child(even) .frame-content {
+  .scene-card.is-open:nth-child(even) .frame-content {
     order: 1;
   }
 
-  /* Última centrada: columna única */
-  .scene-card.is-center .scene-frame {
-    grid-template-columns: 1fr;
+  /* Última centrada: texto debajo de la imagen */
+  .scene-card.is-open.is-center .scene-frame {
+    flex-direction: column;
   }
 }
 
