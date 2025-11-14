@@ -1,6 +1,6 @@
 <template>
   <section class="scene-gallery-wrapper">
-    <heroIntroPanel />
+    <!--<heroIntroPanel /> -->
     <PathTrail />
 
     <section class="scene-gallery" aria-label="Galería">
@@ -20,7 +20,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
 import SceneCard from './SceneCard.vue'
 import PathTrail from './PathTrail.vue'
 import heroIntroPanel from './GalleryIntroPanel.vue'

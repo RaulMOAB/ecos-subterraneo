@@ -57,3 +57,11 @@ button,
   font-family: var(--font-sans);
   font-weight: 600;
 }
+.scene-gallery-wrapper {
+  position: relative;
+}
+
+.scene-gallery {
+  position: relative;
+  z-index: 1; /* por encima del path */
+}
