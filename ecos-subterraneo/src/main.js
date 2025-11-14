@@ -3,6 +3,7 @@ import './style.css'
 import App from './App.vue'
 import router from './router'
 import Lenis from '@studio-freight/lenis'
+import './styles/pathTrail.css'
 
 const lenis = new Lenis({
   smooth: true,
