@@ -13,6 +13,10 @@ export function usePathTrail() {
   const beeX = ref(0)
   const beeY = ref(0)
   const beeUrl = beeUrlImport
+  const beeAngle = ref(0)
+  let lastScrollY = window.scrollY || window.pageYOffset
+
+  const isBeeHovered = ref(false)
 
   // mostrar abeja solo cuando el tronco tiene longitud
   const hasTrunk = computed(() => trunkEnd.value > trunkStart.value)
@@ -167,17 +171,40 @@ export function usePathTrail() {
 
     const svgRect = svg.getBoundingClientRect()
 
-    // centro vertical del viewport en coordenadas del documento
     const viewportCenter = window.innerHeight / 2
-
-    // lo convertimos a coordenadas relativas al SVG
     let ySvg = viewportCenter - svgRect.top
 
-    // clamp para que no salga del tronco
     ySvg = Math.max(trunkStart.value, Math.min(ySvg, trunkEnd.value))
+
+    // cálculo de inclinación según cambio de scroll
+    const currentScrollY = window.scrollY || window.pageYOffset
+    const delta = currentScrollY - lastScrollY
+    lastScrollY = currentScrollY
+
+    // mapeamos el delta a un ángulo entre -15 y 15 grados aprox.
+    const maxDelta = 30 // cuanto más pequeño, más sensible
+    const clamped = Math.max(-maxDelta, Math.min(maxDelta, delta))
+    beeAngle.value = (clamped / maxDelta) * 15
 
     beeX.value = trunkX.value
     beeY.value = ySvg
+  }
+  const onBeeEnter = () => {
+    isBeeHovered.value = true
+  }
+
+  const onBeeLeave = () => {
+    isBeeHovered.value = false
+  }
+
+  const onBeeClick = () => {
+    const cards = getSceneCards()
+    const index = visibleBranchIndex.value
+
+    if (!cards.length || index < 0 || index >= cards.length) return
+
+    const card = cards[index]
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' })
   }
 
   const recalcAll = () => {
@@ -209,5 +236,10 @@ export function usePathTrail() {
     beeY,
     hasTrunk,
     beeUrl,
+    beeAngle,
+    isBeeHovered,
+    onBeeEnter,
+    onBeeLeave,
+    onBeeClick,
   }
 }

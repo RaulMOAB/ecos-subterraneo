@@ -13,6 +13,7 @@
 .scene-path {
   width: 100%;
   height: 100%;
+  pointer-events: none;
 }
 
 /* Aseguramos que el path se dibuja (aunque ya tenga stroke inline) */
@@ -33,8 +34,20 @@
 }
 
 /* Abeja opcional, no afecta al tronco ni ramas */
+.scene-path-bee {
+  cursor: pointer;
+}
 .scene-path-bee image {
   transform: scale(4);
-
+  transition: transform 0.18s ease-out, filter 0.18s ease-out;
   filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.7));
+}
+.scene-path-bee,
+.scene-path-bee image {
+  pointer-events: auto;
+  cursor: pointer;
+}
+.scene-path-bee.is-hovered image {
+  transform: scale(1.12);
+  filter: drop-shadow(0 0 8px rgba(245, 192, 90, 0.9));
 }

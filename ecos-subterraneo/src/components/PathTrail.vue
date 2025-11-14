@@ -31,7 +31,11 @@
       <g
         v-if="hasTrunk"
         class="scene-path-bee"
-        :transform="`translate(${beeX} ${beeY})`"
+        :class="{ 'is-hovered': isBeeHovered }"
+        :transform="`translate(${beeX} ${beeY}) rotate(${beeAngle})`"
+        @mouseenter="onBeeEnter"
+        @mouseleave="onBeeLeave"
+        @click="onBeeClick"
       >
         <image
           :href="beeUrl"
@@ -60,6 +64,11 @@ const {
   beeY,
   hasTrunk,
   beeUrl,
+  beeAngle,
+  isBeeHovered,
+  onBeeEnter,
+  onBeeLeave,
+  onBeeClick,
 } = usePathTrail()
 </script>
 
