@@ -1,37 +1,30 @@
-/* Capa fija centrada donde se dibuja el camino */
 .path-layer {
   position: fixed;
   top: 0;
   bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: clamp(70px, 6vw, 140px);
-  pointer-events: none;
-  z-index: 50; /* por encima del fondo y, en principio, debajo del UI */
 
-  /* Actívalo para depurar si quieres ver la franja central:
-  background: rgba(255, 0, 0, 0.1);
-  */
+  /* ANTES: left: 50%; transform: translateX(-50%); width: clamp(70px, 6vw, 140px); */
+  left: 0;
+  width: 100vw; /* el SVG ocupará todo el ancho de la ventana */
+
+  pointer-events: none;
+  z-index: 0;
 }
 
-/* El SVG ocupa toda la altura visible */
 .scene-path {
   width: 100%;
   height: 100%;
 }
 
-/* Tronco vertical siempre visible */
 .scene-path-trunk {
   opacity: 1;
 }
 
-/* Ramas laterales invisibles por defecto */
 .scene-path-branch {
   opacity: 0;
   transition: opacity 220ms ease-out;
 }
 
-/* Rama de la escena activa */
 .scene-path-branch.is-visible {
   opacity: 1;
 }
