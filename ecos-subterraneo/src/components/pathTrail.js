@@ -25,7 +25,7 @@ export function usePathTrail() {
   const INTRO_SELECTOR = '.hero-intro-panel'
 
   // margen para que el tronco NO llegue al final de la última escena
-  const TRUNK_BOTTOM_MARGIN = 100
+  const TRUNK_BOTTOM_MARGIN = 10
 
   const getSceneCards = () =>
     Array.from(document.querySelectorAll('.scene-card'))

@@ -151,44 +151,62 @@ export function useParallax(props) {
     layers = []
   }
 
-  onMounted(() => {
-    // nada, initParallax lo llamas desde el componente
-  })
-
-  onUnmounted(() => {
-    destroyParallax()
-  })
-
   const introAudio = ref(null)
   const isAudioPlaying = ref(false)
+  const hasInitializedAudio = ref(false)
 
-  function toggleIntroAudio() {
-    if (!introAudio.value) return
-
-    if (isAudioPlaying.value) {
-      introAudio.value.pause()
-    } else {
-      introAudio.value.play()
-    }
-
-    isAudioPlaying.value = !isAudioPlaying.value
-  }
-
-  function fadeInAudio() {
+  function playWithFadeIn() {
     const audio = introAudio.value
     if (!audio) return
 
-    audio.volume = 0
-    audio.play()
+    hasInitializedAudio.value = true
     isAudioPlaying.value = true
 
+    audio.volume = 0
+    audio.play()
+
     let v = 0
+    const step = 0.05
     const interval = setInterval(() => {
-      v += 0.05
+      // si el usuario pausa en mitad del fade, cortamos
+      if (!isAudioPlaying.value || !introAudio.value) {
+        clearInterval(interval)
+        return
+      }
+      v += step
+      if (v >= 1) {
+        v = 1
+        clearInterval(interval)
+      }
       audio.volume = v
-      if (v >= 1) clearInterval(interval)
-    }, 100)
+    }, 120)
   }
 
-  return { layerStyle, initParallax, destroyParallax, sceneRef }
+  function toggleAudio() {
+    const audio = introAudio.value
+    if (!audio) return
+
+    if (!hasInitializedAudio.value) {
+      fadeInAudio()
+      return
+    }
+
+    if (isAudioPlaying.value) {
+      audio.pause()
+      isAudioPlaying.value = false
+    } else {
+      audio.play()
+      isAudioPlaying.value = true
+    }
+  }
+  return {
+    layerStyle,
+    initParallax,
+    destroyParallax,
+    sceneRef,
+    introAudio,
+    isAudioPlaying,
+    toggleAudio,
+    playWithFadeIn,
+  }
 }

@@ -10,8 +10,6 @@ import '@/styles/sceneGallery.css'
 <template>
   <HeroParallax />
 
-  <Bee />
-  <PathScroll />
   <section id="galeria">
     <!-- Aquí irá SceneGallery -->
     <div id="escena-1">
