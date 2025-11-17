@@ -14,9 +14,9 @@ export function usePathTrail() {
   const beeY = ref(0)
   const beeUrl = beeUrlImport
   const beeAngle = ref(0)
-  let lastScrollY = window.scrollY || window.pageYOffset
-
   const isBeeHovered = ref(false)
+
+  let lastScrollY = window.scrollY || window.pageYOffset
 
   // mostrar abeja solo cuando el tronco tiene longitud
   const hasTrunk = computed(() => trunkEnd.value > trunkStart.value)
@@ -25,7 +25,7 @@ export function usePathTrail() {
   const INTRO_SELECTOR = '.hero-intro-panel'
 
   // margen para que el tronco NO llegue al final de la última escena
-  const TRUNK_BOTTOM_MARGIN = 300
+  const TRUNK_BOTTOM_MARGIN = 100
 
   const getSceneCards = () =>
     Array.from(document.querySelectorAll('.scene-card'))
@@ -61,6 +61,10 @@ export function usePathTrail() {
    * - el tronco permanece vertical y centrado
    * - el extremo de cada rama se engancha al borde de la imagen (.scene-img)
    * Además fija trunkEnd para que no atraviese la última escena.
+   *
+   * IMPORTANTE:
+   * Guardamos también coordenadas en sistema de documento (topDoc/bottomDoc)
+   * para no tener que recalcular geometría en cada scroll.
    */
   const buildBranches = () => {
     const svg = svgEl.value
@@ -68,6 +72,7 @@ export function usePathTrail() {
 
     const cards = getSceneCards()
     const svgRect = svg.getBoundingClientRect()
+    const scrollY = window.scrollY || window.pageYOffset
 
     if (!cards.length) {
       branches.value = []
@@ -121,11 +126,20 @@ export function usePathTrail() {
 
       const d = `M ${trunkXsvg} ${ySvg} L ${endX} ${ySvg}`
 
+      // coordenadas en sistema de documento (no de viewport)
+      const topDoc = rect.top + scrollY
+      const bottomDoc = rect.bottom + scrollY
+
       return {
         d,
+        ySvg,
+        // dejamos estos campos por compatibilidad, aunque
+        // la lógica nueva usa topDoc/bottomDoc:
         topViewport,
         bottomViewport,
-        ySvg,
+        // nuevos campos coherentes con scroll:
+        topDoc,
+        bottomDoc,
       }
     })
 
@@ -137,7 +151,7 @@ export function usePathTrail() {
   }
 
   /**
-   * Rama activa: escena cuyo top <= centro del viewport <= bottom.
+   * Rama activa: escena cuyo topDoc <= centro del viewport (en coords de documento) <= bottomDoc.
    */
   const updateActiveBranch = () => {
     if (!branches.value.length) {
@@ -145,13 +159,15 @@ export function usePathTrail() {
       return
     }
 
-    const viewportCenter = window.innerHeight / 2
+    const scrollY = window.scrollY || window.pageYOffset
+    const viewportCenterDoc = scrollY + window.innerHeight / 2
+
     let active = -1
 
     branches.value.forEach((branch, index) => {
       if (
-        viewportCenter >= branch.topViewport &&
-        viewportCenter <= branch.bottomViewport
+        viewportCenterDoc >= branch.topDoc &&
+        viewportCenterDoc <= branch.bottomDoc
       ) {
         active = index
       }
@@ -189,6 +205,7 @@ export function usePathTrail() {
     beeX.value = trunkX.value
     beeY.value = ySvg
   }
+
   const onBeeEnter = () => {
     isBeeHovered.value = true
   }
@@ -207,22 +224,41 @@ export function usePathTrail() {
     card.scrollIntoView({ behavior: 'smooth', block: 'center' })
   }
 
-  const recalcAll = () => {
+  /**
+   * Recalcula solo la geometría (tronco + ramas).
+   * Útil cuando cambia el layout de las escenas (por ejemplo, al abrir/cerrar).
+   */
+  const recalcGeometry = () => {
     computeTrunkStart()
     buildBranches()
+  }
+
+  /**
+   * Recalcula solo lo que depende del scroll:
+   * - rama activa
+   * - posición/ángulo de la abeja
+   */
+  const recalcOnScroll = () => {
     updateActiveBranch()
     updateBeePosition()
   }
 
+  const onResize = () => {
+    recalcGeometry()
+    recalcOnScroll()
+  }
+
   onMounted(() => {
-    recalcAll()
-    window.addEventListener('scroll', recalcAll, { passive: true })
-    window.addEventListener('resize', recalcAll)
+    recalcGeometry()
+    recalcOnScroll()
+
+    window.addEventListener('scroll', recalcOnScroll, { passive: true })
+    window.addEventListener('resize', onResize)
   })
 
   onBeforeUnmount(() => {
-    window.removeEventListener('scroll', recalcAll)
-    window.removeEventListener('resize', recalcAll)
+    window.removeEventListener('scroll', recalcOnScroll)
+    window.removeEventListener('resize', onResize)
   })
 
   return {
@@ -241,5 +277,7 @@ export function usePathTrail() {
     onBeeEnter,
     onBeeLeave,
     onBeeClick,
+    recalcGeometry,
+    recalcOnScroll,
   }
 }

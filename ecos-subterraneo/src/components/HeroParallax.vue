@@ -7,6 +7,7 @@
     :slotZ="10"
     class="hero-parallax"
   >
+    <audio ref="introAudio" src="@/assets/audio/intro.mp3" loop></audio>
     <article class="hero" aria-labelledby="hero-title">
       <div class="hero-backdrop" aria-hidden="true"></div>
       <div class="hero-content">

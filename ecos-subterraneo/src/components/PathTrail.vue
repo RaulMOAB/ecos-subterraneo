@@ -51,7 +51,11 @@
 </template>
 
 <script setup>
+import { defineExpose } from 'vue'
 import { usePathTrail } from './pathTrail.js'
+
+// usamos el hook optimizado
+const api = usePathTrail()
 
 const {
   svgEl,
@@ -69,7 +73,17 @@ const {
   onBeeEnter,
   onBeeLeave,
   onBeeClick,
-} = usePathTrail()
+  // nuevos métodos opcionales
+  recalcGeometry,
+  recalcOnScroll,
+} = api
+
+// opcional: exponemos estos métodos al padre para que pueda
+// forzar un recálculo cuando abras/cierres escenas
+defineExpose({
+  recalcGeometry,
+  recalcOnScroll,
+})
 </script>
 
 <style src="@/styles/pathTrail.css"></style>

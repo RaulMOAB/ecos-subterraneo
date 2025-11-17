@@ -159,5 +159,36 @@ export function useParallax(props) {
     destroyParallax()
   })
 
+  const introAudio = ref(null)
+  const isAudioPlaying = ref(false)
+
+  function toggleIntroAudio() {
+    if (!introAudio.value) return
+
+    if (isAudioPlaying.value) {
+      introAudio.value.pause()
+    } else {
+      introAudio.value.play()
+    }
+
+    isAudioPlaying.value = !isAudioPlaying.value
+  }
+
+  function fadeInAudio() {
+    const audio = introAudio.value
+    if (!audio) return
+
+    audio.volume = 0
+    audio.play()
+    isAudioPlaying.value = true
+
+    let v = 0
+    const interval = setInterval(() => {
+      v += 0.05
+      audio.volume = v
+      if (v >= 1) clearInterval(interval)
+    }, 100)
+  }
+
   return { layerStyle, initParallax, destroyParallax, sceneRef }
 }

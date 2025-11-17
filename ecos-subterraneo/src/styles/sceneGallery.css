@@ -251,3 +251,8 @@
   border-radius: 18px;
   box-shadow: none; /* ya tenemos la sombra en la card */
 }
+
+/*.scene-card:last-child.is-open {
+  margin-bottom: 10rem;
+}
+  */

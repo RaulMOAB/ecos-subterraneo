@@ -6,7 +6,7 @@
   z-index: 0;
 
   /* Hacemos el SVG más grande verticalmente */
-  height: 160%;
+  height: 120%;
   top: -30%;
 }
 /* El SVG ocupa todo el wrapper */
@@ -14,6 +14,7 @@
   width: 100%;
   height: 100%;
   pointer-events: none;
+  overflow: visible;
 }
 
 /* Aseguramos que el path se dibuja (aunque ya tenga stroke inline) */
@@ -50,4 +51,8 @@
 .scene-path-bee.is-hovered image {
   transform: scale(1.12);
   filter: drop-shadow(0 0 8px rgba(245, 192, 90, 0.9));
+}
+
+.scene-card:last-child.is-open {
+  margin-bottom: 35vh;
 }

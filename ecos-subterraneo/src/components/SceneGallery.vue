@@ -23,7 +23,6 @@
 import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
 import SceneCard from './SceneCard.vue'
 import PathTrail from './PathTrail.vue'
-import heroIntroPanel from './GalleryIntroPanel.vue'
 import { scenes as defaultScenes } from './scenesData.js'
 
 const props = defineProps({ items: { type: Array, default: null } })
