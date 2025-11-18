@@ -17,6 +17,26 @@
         loading="lazy"
         decoding="async"
       />
+
+      <!-- 🔊 BOTÓN DE AUDIO EN LA ESQUINA SUPERIOR DERECHA DE LA IMAGEN -->
+      <button
+        v-if="audioSrc && open"
+        type="button"
+        class="scene-audio-toggle--image"
+        @click.stop="toggleSceneAudio"
+        :aria-pressed="sceneAudioPlaying"
+        :aria-label="
+          sceneAudioPlaying
+            ? 'Silenciar audio de la escena'
+            : 'Activar audio de la escena'
+        "
+      >
+        <img
+          :src="sceneAudioPlaying ? soundOffUrl : soundOnUrl"
+          alt=""
+          class="scene-audio-icon"
+        />
+      </button>
     </figure>
 
     <!-- CTA CUANDO ESTÁ CERRADA -->
@@ -61,6 +81,8 @@
 
 <script setup>
 import { ref, computed, watch, onBeforeUnmount } from 'vue'
+import soundOnUrl from '@/assets/resources/sound-on.png'
+import soundOffUrl from '@/assets/resources/sound-off.png'
 
 const props = defineProps({
   title: { type: String, required: true },
@@ -72,14 +94,10 @@ const props = defineProps({
   anchor: { type: String, default: '' },
   ctaLabel: { type: String, default: '' },
   defaultOpen: { type: Boolean, default: false },
-
-  // antes lo tenías required: true, pero no lo usas desde el padre,
-  // y además no lo estás usando en el template, así que lo dejamos opcional
   isOpen: {
     type: Boolean,
     default: false,
   },
-
   audioSrc: {
     type: String,
     default: null,
@@ -93,6 +111,7 @@ const props = defineProps({
 const open = ref(props.defaultOpen || props.isOpen)
 const cardRef = ref(null)
 const sceneAudio = ref(null)
+const sceneAudioPlaying = ref(false) // estado de audio de esta escena
 
 function toggle() {
   open.value = !open.value
@@ -194,41 +213,48 @@ function playSceneAudio() {
   if (!sceneAudio.value) return
   sceneAudio.value.currentTime = 0
   sceneAudio.value.play()
+  sceneAudioPlaying.value = true
 }
 
 function stopSceneAudio() {
   if (!sceneAudio.value) return
   sceneAudio.value.pause()
   sceneAudio.value.currentTime = 0
+  sceneAudioPlaying.value = false
 }
 
-// Cuando cambia `open`, decidimos si reproducir o parar audio,
-// y disparamos los eventos para el hero.
+// toggle solo del audio de la escena (no abre/cierra la card)
+function toggleSceneAudio() {
+  if (!sceneAudio.value) return
+  if (sceneAudioPlaying.value) {
+    stopSceneAudio()
+  } else {
+    playSceneAudio()
+  }
+}
+
+// cuando cambia `open`, gestionamos audio + eventos del hero
 watch(
   open,
   (isNowOpen) => {
     if (isNowOpen) {
-      // reproducir audio de la escena, si lo hay
+      // reproducir audio de la escena si existe
       if (props.audioSrc) {
         playSceneAudio()
       }
 
       if (props.isFinal) {
-        // la última escena apaga el hero
         window.dispatchEvent(new CustomEvent('final-scene-open'))
       } else {
-        // escenas normales: el hero baja volumen
         window.dispatchEvent(new CustomEvent('scene-opened'))
       }
     } else {
-      // al cerrar, se detiene el audio de la escena
+      // al cerrar, parar audio de escena
       stopSceneAudio()
 
       if (!props.isFinal) {
-        // en escenas normales, el hero recupera volumen
         window.dispatchEvent(new CustomEvent('scene-closed'))
       }
-      // en la final no restauramos nada: queremos que el hero siga apagado
     }
   },
   { immediate: false },

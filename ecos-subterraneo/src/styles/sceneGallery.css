@@ -31,6 +31,7 @@
   display: grid;
   grid-template-columns: 1fr;
   gap: clamp(14px, 2vw, 18px);
+  position: relative;
 }
 
 /* Zig-zag por alineación */
@@ -158,7 +159,54 @@
   font-weight: 600;
   cursor: pointer;
 }
+.scene-audio-toggle {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(7, 7, 12, 0.75);
+  backdrop-filter: blur(10px);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+}
 
+.scene-audio-toggle--image {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  z-index: 30;
+
+  width: 36px;
+  height: 36px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(7, 7, 12, 0.75);
+  backdrop-filter: blur(8px);
+
+  cursor: pointer;
+  padding: 0;
+}
+.scene-audio-toggle:hover {
+  border-color: rgba(255, 255, 255, 0.35);
+}
+.scene-audio-toggle--image:hover {
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.scene-audio-icon {
+  width: 18px;
+  height: 18px;
+  display: block;
+  pointer-events: none;
+}
 .sc-ghost {
   border: 1px solid rgba(140, 180, 255, 0.25);
   background: rgba(15, 20, 33, 0.6);
