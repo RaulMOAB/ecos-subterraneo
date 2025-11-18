@@ -30,22 +30,25 @@ export function useHeroParallax() {
       opacity: 1,
     },
   ]
-  // ---- AUDIO ----
+  // ---------------------------
+  // AUDIO DEL HERO
+  // ---------------------------
   const isAudioPlaying = ref(false)
   const hasInitializedAudio = ref(false)
 
-  // Fade in cuando se activa por primera vez
   function playWithFadeIn(audioEl) {
     if (!audioEl) return
 
     hasInitializedAudio.value = true
     isAudioPlaying.value = true
 
-    audioEl.volume = 0
+    audioEl.volume = 0 // fade desde 0
     audioEl.play()
 
     let v = 0
-    const step = 0.05
+    const target = 0.2 // volumen suave del hero
+    const step = 0.02
+
     const interval = setInterval(() => {
       if (!isAudioPlaying.value || !audioEl) {
         clearInterval(interval)
@@ -53,19 +56,19 @@ export function useHeroParallax() {
       }
 
       v += step
-      if (v >= 1) {
-        v = 1
+      if (v >= target) {
+        v = target
         clearInterval(interval)
       }
+
       audioEl.volume = v
     }, 120)
   }
 
-  // Icono de sonido: toggle on/off
   function toggleAudio(audioEl) {
     if (!audioEl) return
 
-    // primera vez → fade in
+    // Primera reproducción → fade-in a 0.2
     if (!hasInitializedAudio.value) {
       playWithFadeIn(audioEl)
       return
@@ -74,17 +77,32 @@ export function useHeroParallax() {
     if (isAudioPlaying.value) {
       audioEl.pause()
       isAudioPlaying.value = false
-    } else {
-      audioEl.play()
-      isAudioPlaying.value = true
+      return
     }
-  }
 
-  // Para el botón "Comenzar descenso"
+    // Reanudar a volumen suave
+    isAudioPlaying.value = true
+    audioEl.volume = 0.2
+    audioEl.play()
+  }
   function stopHeroAudio(audioEl) {
     if (!audioEl) return
     audioEl.pause()
     isAudioPlaying.value = false
+  }
+
+  // Baja el volumen mientras una escena está abierta (no final)
+  function duckHeroAudio(audioEl) {
+    if (!audioEl) return
+    if (!isAudioPlaying.value) return
+    audioEl.volume = 0.1 // volumen reducido
+  }
+
+  // Restaura el volumen cuando la escena se cierra
+  function restoreHeroAudio(audioEl) {
+    if (!audioEl) return
+    if (!isAudioPlaying.value) return
+    audioEl.volume = 0.2 // volumen normal
   }
 
   return {
@@ -92,5 +110,7 @@ export function useHeroParallax() {
     isAudioPlaying,
     toggleAudio,
     stopHeroAudio,
+    duckHeroAudio,
+    restoreHeroAudio,
   }
 }

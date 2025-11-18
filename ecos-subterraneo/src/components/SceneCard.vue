@@ -53,11 +53,14 @@
         </button>
       </div>
     </section>
+
+    <!-- AUDIO AMBIENTAL DE LA ESCENA -->
+    <audio v-if="audioSrc" ref="sceneAudio" :src="audioSrc" loop></audio>
   </article>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch, onBeforeUnmount } from 'vue'
 
 const props = defineProps({
   title: { type: String, required: true },
@@ -69,10 +72,27 @@ const props = defineProps({
   anchor: { type: String, default: '' },
   ctaLabel: { type: String, default: '' },
   defaultOpen: { type: Boolean, default: false },
+
+  // antes lo tenías required: true, pero no lo usas desde el padre,
+  // y además no lo estás usando en el template, así que lo dejamos opcional
+  isOpen: {
+    type: Boolean,
+    default: false,
+  },
+
+  audioSrc: {
+    type: String,
+    default: null,
+  },
+  isFinal: {
+    type: Boolean,
+    default: false,
+  },
 })
 
-const open = ref(props.defaultOpen)
+const open = ref(props.defaultOpen || props.isOpen)
 const cardRef = ref(null)
+const sceneAudio = ref(null)
 
 function toggle() {
   open.value = !open.value
@@ -167,4 +187,54 @@ function smoothScrollTo(targetY, { duration = 900 } = {}) {
 
   requestAnimationFrame(raf)
 }
+
+/* ==== AUDIO DE ESCENA + COMUNICACIÓN CON EL HERO ==== */
+
+function playSceneAudio() {
+  if (!sceneAudio.value) return
+  sceneAudio.value.currentTime = 0
+  sceneAudio.value.play()
+}
+
+function stopSceneAudio() {
+  if (!sceneAudio.value) return
+  sceneAudio.value.pause()
+  sceneAudio.value.currentTime = 0
+}
+
+// Cuando cambia `open`, decidimos si reproducir o parar audio,
+// y disparamos los eventos para el hero.
+watch(
+  open,
+  (isNowOpen) => {
+    if (isNowOpen) {
+      // reproducir audio de la escena, si lo hay
+      if (props.audioSrc) {
+        playSceneAudio()
+      }
+
+      if (props.isFinal) {
+        // la última escena apaga el hero
+        window.dispatchEvent(new CustomEvent('final-scene-open'))
+      } else {
+        // escenas normales: el hero baja volumen
+        window.dispatchEvent(new CustomEvent('scene-opened'))
+      }
+    } else {
+      // al cerrar, se detiene el audio de la escena
+      stopSceneAudio()
+
+      if (!props.isFinal) {
+        // en escenas normales, el hero recupera volumen
+        window.dispatchEvent(new CustomEvent('scene-closed'))
+      }
+      // en la final no restauramos nada: queremos que el hero siga apagado
+    }
+  },
+  { immediate: false },
+)
+
+onBeforeUnmount(() => {
+  stopSceneAudio()
+})
 </script>
