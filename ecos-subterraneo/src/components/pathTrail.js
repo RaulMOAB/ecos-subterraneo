@@ -20,6 +20,7 @@ export function usePathTrail() {
   let resizeObserver = null
   let autoFlyAnimationId = null
   let isBeeAutoFlying = false
+  let freezeBeeAtEnd = false
 
   // mostrar abeja solo cuando el tronco tiene longitud
   const hasTrunk = computed(() => trunkEnd.value > trunkStart.value)
@@ -28,7 +29,7 @@ export function usePathTrail() {
   const INTRO_SELECTOR = '.hero-intro-panel'
 
   // margen para que el tronco NO llegue al final de la última escena
-  const TRUNK_BOTTOM_MARGIN = -300 // si quieres más “aire”, súbelo (p.ej. 200–300)
+  const TRUNK_BOTTOM_MARGIN = -500 // si quieres más “aire”, súbelo (p.ej. 200–300)
 
   const getSceneCards = () =>
     Array.from(document.querySelectorAll('.scene-card'))
@@ -147,7 +148,7 @@ export function usePathTrail() {
     })
 
     // --- Cálculo normal del tronco según las escenas ---
-    const svgHeight = svgRect.height
+    //const svgHeight = svgRect.height
     let endY = lastBottomSvg - TRUNK_BOTTOM_MARGIN
 
     // --- NUEVO: recorte suave para integrar el footer ---
@@ -170,10 +171,7 @@ export function usePathTrail() {
     }
 
     // --- clamp final de seguridad ---
-    trunkEnd.value = Math.max(
-      trunkStart.value + 20,
-      Math.min(endY, svgHeight - 20),
-    )
+    trunkEnd.value = Math.max(trunkStart.value + endY)
   }
 
   /**
@@ -211,30 +209,41 @@ export function usePathTrail() {
     const svg = svgEl.value
     if (!svg) return
 
+    // Si está en animación automática, no forzamos nada desde el scroll
+    if (isBeeAutoFlying) return
+
+    // Si ya ha llegado al final y queremos que se quede allí, la fijamos y salimos
+    if (freezeBeeAtEnd) {
+      beeX.value = trunkX.value
+      beeY.value = trunkEnd.value
+      beeAngle.value = 0
+      return
+    }
+
     const svgRect = svg.getBoundingClientRect()
 
+    // Centro del viewport mapeado al SVG
     const viewportCenter = window.innerHeight / 2
     let ySvg = viewportCenter - svgRect.top
 
+    // Limitamos al rango del tronco
     ySvg = Math.max(trunkStart.value, Math.min(ySvg, trunkEnd.value))
 
-    // cálculo de inclinación según cambio de scroll
+    // Cálculo de inclinación según cambio de scroll
     const currentScrollY = window.scrollY || window.pageYOffset
     const delta = currentScrollY - lastScrollY
     lastScrollY = currentScrollY
 
-    // 1) Ángulo de la abeja
     const maxDelta = 30 // cuanto más pequeño, más sensible
     const clamped = Math.max(-maxDelta, Math.min(maxDelta, delta))
     beeAngle.value = (clamped / maxDelta) * 15
 
-    // 2) Intensidad del glow en función de la velocidad del scroll
+    // Intensidad del glow en función de la velocidad de scroll
     const speed = Math.min(1, Math.abs(delta) / 40) // normaliza 0–1
-    const intensity = 0.4 + speed * 0.5
-
-    // aplicamos la intensidad al SVG mediante variable CSS
+    const intensity = 0.4 + speed * 0.5 // 0.4 en reposo → 0.9 scroll rápido
     svg.style.setProperty('--path-glow-intensity', intensity.toString())
 
+    // Posición final de la abeja
     beeX.value = trunkX.value
     beeY.value = ySvg
   }
@@ -271,7 +280,7 @@ export function usePathTrail() {
 
     const startY = beeY.value
     const endY = trunkEnd.value
-    const duration = 800 // ms
+    const duration = 2500 // ms
     const startTime = performance.now()
 
     isBeeAutoFlying = true
@@ -291,8 +300,18 @@ export function usePathTrail() {
       } else {
         isBeeAutoFlying = false
         autoFlyAnimationId = null
+
+        // bloquear la posición final PERMANENTEMENTE
+        beeY.value = trunkEnd.value
+        beeX.value = trunkX.value
+        beeAngle.value = 0
         // sincronizar lastScrollY para evitar salto de ángulo en el siguiente scroll
         lastScrollY = window.scrollY || window.pageYOffset
+
+        freezeBeeAtEnd = true
+        beeY.value = trunkEnd.value
+        beeX.value = trunkX.value
+        beeAngle.value = 0
       }
     }
 

@@ -18,6 +18,7 @@
   padding-inline: var(--side-gutter);
   width: 100%;
   justify-items: stretch;
+  position: relative;
 }
 
 /* =========================================================
