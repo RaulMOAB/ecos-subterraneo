@@ -69,6 +69,32 @@ button,
   font-family: var(--font-sans);
   font-weight: 600;
 }
+
+.scene-img {
+  transition: transform 0.25s ease, filter 0.25s ease, box-shadow 0.25s ease;
+}
+
+.scene-card.is-open {
+  transition: transform 0.25s ease, filter 0.25s ease, box-shadow 0.25s ease;
+}
+.scene-img:hover:not(.is-open) {
+  transform: translateY(-4px);
+  filter: brightness(1.08);
+  box-shadow: 0 0 20px rgba(255, 210, 100, 0.05);
+}
+.scene-gallery::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    circle at 50% 30%,
+    rgba(255, 220, 150, 0.03),
+    rgba(0, 0, 0, 0.9)
+  );
+  z-index: -1;
+}
+
 .scene-gallery-wrapper {
   position: relative;
 }

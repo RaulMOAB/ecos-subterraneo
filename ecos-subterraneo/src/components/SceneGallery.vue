@@ -18,14 +18,17 @@
         :is-final="scene.isFinal"
       />
     </section>
+    <GalleryFooter />
   </section>
 </template>
 
 <script setup>
 import { computed } from 'vue'
+import { onMounted, onBeforeUnmount, ref } from 'vue'
 import SceneCard from './SceneCard.vue'
 import PathTrail from './PathTrail.vue'
 import { scenes as defaultScenes } from './scenesData.js'
+import GalleryFooter from './GalleryFooter.vue'
 
 /**
  * 1) Importa aquí los audios de cada escena
@@ -45,6 +48,40 @@ const sceneAudios = [
   scene4Audio,
   scene5Audio,
 ]
+
+const cardsObserver = ref(null)
+
+onMounted(() => {
+  // Seguridad: solo en entorno navegador
+  if (typeof window === 'undefined') return
+
+  const cards = document.querySelectorAll('.scene-card')
+  if (!cards.length) return
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible')
+          // Una vez visible, dejamos de observar esa card
+          observer.unobserve(entry.target)
+        }
+      })
+    },
+    {
+      threshold: 0.2,
+    },
+  )
+
+  cards.forEach((card) => observer.observe(card))
+  cardsObserver.value = observer
+})
+
+onBeforeUnmount(() => {
+  if (cardsObserver.value) {
+    cardsObserver.value.disconnect()
+  }
+})
 
 const props = defineProps({
   items: { type: Array, default: null },

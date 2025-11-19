@@ -18,11 +18,12 @@
         v-for="(branch, index) in branches"
         :key="index"
         class="scene-path-branch"
-        :class="{ 'is-visible': index === visibleBranchIndex }"
+        :class="[
+          'scene-path-branch',
+          { 'scene-path-branch--active': index === visibleBranchIndex },
+        ]"
         :d="branch.d"
         fill="none"
-        stroke="#f5c05a"
-        stroke-width="4"
         stroke-linecap="round"
         stroke-linejoin="round"
       />

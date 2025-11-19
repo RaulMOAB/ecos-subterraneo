@@ -299,8 +299,32 @@
   border-radius: 18px;
   box-shadow: none; /* ya tenemos la sombra en la card */
 }
+.scene-card.is-open {
+  filter: brightness(1.12);
+  box-shadow: 0 0 45px rgba(255, 210, 100, 0.15);
+  transition: filter 0.3s ease, box-shadow 0.3s ease;
+}
 
 /*.scene-card:last-child.is-open {
   margin-bottom: 10rem;
 }
   */
+
+.scene-card {
+  opacity: 0.7;
+  transform: translateY(20px);
+}
+
+.scene-card.visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+.scene-card button {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.scene-card button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 10px rgba(255, 210, 100, 0.3);
+}

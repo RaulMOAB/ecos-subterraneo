@@ -1,3 +1,7 @@
+:root {
+  --path-glow-intensity: 0.4;
+}
+
 /* El wrapper solo sirve para colocar el SVG por debajo de las escenas */
 .path-layer {
   position: absolute;
@@ -15,6 +19,7 @@
   height: 100%;
   pointer-events: none;
   overflow: visible;
+  display: block;
 }
 
 /* Aseguramos que el path se dibuja (aunque ya tenga stroke inline) */
@@ -55,4 +60,49 @@
 
 .scene-card:last-child.is-open {
   margin-bottom: 35vh;
+}
+/* Transiciones suaves en tronco y ramas */
+.scene-path-trunk,
+.scene-path-branch {
+  transition: stroke 0.35s ease, stroke-width 0.35s ease, opacity 0.35s ease,
+    filter 0.35s ease;
+}
+
+/* Rama base (no activa) */
+.scene-path-branch {
+  stroke: #7a5a2a;
+  stroke-width: 2px;
+  opacity: 0.35;
+  transition: stroke 0.25s ease, stroke-width 0.25s ease, opacity 0.25s ease,
+    filter 0.25s ease;
+}
+
+/* Rama activa con intensidad intermedia */
+.scene-path-branch--active {
+  stroke: #f5c05a;
+  stroke-width: 4px;
+  opacity: 1;
+  filter: drop-shadow(0 0 12px rgba(245, 192, 90, var(--path-glow-intensity)))
+    drop-shadow(
+      0 0 28px rgba(245, 192, 90, calc(var(--path-glow-intensity) * 0.7))
+    );
+  animation: branchPulse 2.2s ease-in-out infinite;
+}
+/* Animación con pulso */
+@keyframes branchPulseStrong {
+  0% {
+    stroke-width: 4px;
+    filter: drop-shadow(0 0 14px rgba(245, 192, 90, 0.55))
+      drop-shadow(0 0 26px rgba(245, 192, 90, 0.35));
+  }
+  50% {
+    stroke-width: 6px;
+    filter: drop-shadow(0 0 25px rgba(245, 192, 90, 0.75))
+      drop-shadow(0 0 40px rgba(245, 192, 90, 0.55));
+  }
+  100% {
+    stroke-width: 4px;
+    filter: drop-shadow(0 0 14px rgba(245, 192, 90, 0.55))
+      drop-shadow(0 0 26px rgba(245, 192, 90, 0.35));
+  }
 }

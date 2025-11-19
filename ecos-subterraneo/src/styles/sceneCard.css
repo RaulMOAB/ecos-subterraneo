@@ -1,0 +1,9 @@
+.scene-description p {
+  margin: 0 0 1.2rem 0;
+  line-height: 1.6;
+  opacity: 0.95;
+}
+
+.scene-description br {
+  line-height: 1.4;
+}

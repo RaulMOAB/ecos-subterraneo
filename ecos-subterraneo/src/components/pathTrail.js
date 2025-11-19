@@ -17,6 +17,9 @@ export function usePathTrail() {
   const isBeeHovered = ref(false)
 
   let lastScrollY = window.scrollY || window.pageYOffset
+  let resizeObserver = null
+  let autoFlyAnimationId = null
+  let isBeeAutoFlying = false
 
   // mostrar abeja solo cuando el tronco tiene longitud
   const hasTrunk = computed(() => trunkEnd.value > trunkStart.value)
@@ -25,7 +28,7 @@ export function usePathTrail() {
   const INTRO_SELECTOR = '.hero-intro-panel'
 
   // margen para que el tronco NO llegue al final de la última escena
-  const TRUNK_BOTTOM_MARGIN = 10
+  const TRUNK_BOTTOM_MARGIN = -300 // si quieres más “aire”, súbelo (p.ej. 200–300)
 
   const getSceneCards = () =>
     Array.from(document.querySelectorAll('.scene-card'))
@@ -90,7 +93,7 @@ export function usePathTrail() {
 
       const topViewport = rect.top
       const bottomViewport = rect.bottom
-      const yCenterViewport = rect.top + rect.height / 2
+      const yCenterViewport = rect.top + rect.height / 2 // ← centro real de la card
 
       // coordenadas relativas al SVG
       const ySvg = yCenterViewport - svgRect.top
@@ -143,11 +146,34 @@ export function usePathTrail() {
       }
     })
 
-    // El tronco termina un poco antes del final de la última escena
+    // --- Cálculo normal del tronco según las escenas ---
     const svgHeight = svgRect.height
-    const endY = lastBottomSvg - TRUNK_BOTTOM_MARGIN
+    let endY = lastBottomSvg - TRUNK_BOTTOM_MARGIN
 
-    trunkEnd.value = Math.max(trunkStart.value, Math.min(endY, svgHeight))
+    // --- NUEVO: recorte suave para integrar el footer ---
+    const footer = document.querySelector('.gallery-footer')
+    if (footer) {
+      const footerRect = footer.getBoundingClientRect()
+      const svgRect = svgEl.value.getBoundingClientRect()
+
+      // posición del footer en coordenadas del SVG
+      const footerTopSvg = footerRect.top - svgRect.top
+
+      // margen visual de separación entre tronco y núcleo del footer
+      const FOOTER_CLEARANCE = 40
+
+      // si el footer realmente está por debajo del último card
+      if (footerTopSvg > trunkStart.value + 200) {
+        const footerLimit = footerTopSvg - FOOTER_CLEARANCE
+        endY = Math.min(endY, footerLimit)
+      }
+    }
+
+    // --- clamp final de seguridad ---
+    trunkEnd.value = Math.max(
+      trunkStart.value + 20,
+      Math.min(endY, svgHeight - 20),
+    )
   }
 
   /**
@@ -197,10 +223,17 @@ export function usePathTrail() {
     const delta = currentScrollY - lastScrollY
     lastScrollY = currentScrollY
 
-    // mapeamos el delta a un ángulo entre -15 y 15 grados aprox.
+    // 1) Ángulo de la abeja
     const maxDelta = 30 // cuanto más pequeño, más sensible
     const clamped = Math.max(-maxDelta, Math.min(maxDelta, delta))
     beeAngle.value = (clamped / maxDelta) * 15
+
+    // 2) Intensidad del glow en función de la velocidad del scroll
+    const speed = Math.min(1, Math.abs(delta) / 40) // normaliza 0–1
+    const intensity = 0.4 + speed * 0.5
+
+    // aplicamos la intensidad al SVG mediante variable CSS
+    svg.style.setProperty('--path-glow-intensity', intensity.toString())
 
     beeX.value = trunkX.value
     beeY.value = ySvg
@@ -222,6 +255,48 @@ export function usePathTrail() {
 
     const card = cards[index]
     card.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  }
+  const flyBeeToFooter = () => {
+    const svg = svgEl.value
+    if (!svg) return
+
+    // si el tronco no tiene longitud, no hacemos nada
+    if (trunkEnd.value <= trunkStart.value) return
+
+    // cancelar animación previa si la hubiera
+    if (autoFlyAnimationId) {
+      cancelAnimationFrame(autoFlyAnimationId)
+      autoFlyAnimationId = null
+    }
+
+    const startY = beeY.value
+    const endY = trunkEnd.value
+    const duration = 800 // ms
+    const startTime = performance.now()
+
+    isBeeAutoFlying = true
+
+    const animate = (now) => {
+      const t = Math.min(1, (now - startTime) / duration)
+      // suavizado tipo smoothstep
+      const eased = t * t * (3 - 2 * t)
+
+      const newY = startY + (endY - startY) * eased
+      beeY.value = newY
+      beeX.value = trunkX.value
+      beeAngle.value = 0 // horizontal mientras aterriza
+
+      if (t < 1) {
+        autoFlyAnimationId = requestAnimationFrame(animate)
+      } else {
+        isBeeAutoFlying = false
+        autoFlyAnimationId = null
+        // sincronizar lastScrollY para evitar salto de ángulo en el siguiente scroll
+        lastScrollY = window.scrollY || window.pageYOffset
+      }
+    }
+
+    autoFlyAnimationId = requestAnimationFrame(animate)
   }
 
   /**
@@ -248,17 +323,51 @@ export function usePathTrail() {
     recalcOnScroll()
   }
 
+  // NUEVO: observar cambios de tamaño en las scene-card
+  const setupResizeObserver = () => {
+    if (resizeObserver) return
+
+    resizeObserver = new ResizeObserver(() => {
+      // cuando cambia la altura de cualquier .scene-card
+      recalcGeometry()
+      recalcOnScroll()
+    })
+
+    getSceneCards().forEach((card) => resizeObserver.observe(card))
+  }
+
+  const cleanupResizeObserver = () => {
+    if (!resizeObserver) return
+    resizeObserver.disconnect()
+    resizeObserver = null
+  }
+
+  const onFooterVisible = () => {
+    flyBeeToFooter()
+  }
+
   onMounted(() => {
     recalcGeometry()
     recalcOnScroll()
 
+    // activamos el observador de tamaño
+    setupResizeObserver()
+
     window.addEventListener('scroll', recalcOnScroll, { passive: true })
     window.addEventListener('resize', onResize)
+    window.addEventListener('final-footer-visible', onFooterVisible)
   })
 
   onBeforeUnmount(() => {
     window.removeEventListener('scroll', recalcOnScroll)
     window.removeEventListener('resize', onResize)
+    window.removeEventListener('final-footer-visible', onFooterVisible)
+    cleanupResizeObserver()
+
+    if (autoFlyAnimationId) {
+      cancelAnimationFrame(autoFlyAnimationId)
+      autoFlyAnimationId = null
+    }
   })
 
   return {

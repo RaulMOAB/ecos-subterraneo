@@ -87,6 +87,7 @@
   border-radius: 999px;
   font-weight: 600;
   text-decoration: none;
+  cursor: pointer;
   color: #0b0f14;
   background: linear-gradient(135deg, #ffe666 0%, #ffb347 100%);
   box-shadow: 0 12px 30px rgba(255, 191, 69, 0.45),

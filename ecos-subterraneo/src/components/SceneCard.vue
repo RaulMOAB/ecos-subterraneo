@@ -53,9 +53,8 @@
         <h3 class="scene-title">{{ title }}</h3>
       </header>
 
-      <p class="scene-desc">
-        <slot>{{ description }}</slot>
-      </p>
+      <!-- ⬇️ AQUÍ APLICAMOS EL FORMATEO -->
+      <div class="scene-desc" v-html="formattedDescription"></div>
 
       <div class="scene-actions">
         <button class="sc-btn sc-ghost" type="button" @click="open = false">
@@ -81,6 +80,7 @@
 
 <script setup>
 import { ref, computed, watch, onBeforeUnmount } from 'vue'
+
 import soundOnUrl from '@/assets/resources/sound-on.png'
 import soundOffUrl from '@/assets/resources/sound-off.png'
 
@@ -112,6 +112,22 @@ const open = ref(props.defaultOpen || props.isOpen)
 const cardRef = ref(null)
 const sceneAudio = ref(null)
 const sceneAudioPlaying = ref(false) // estado de audio de esta escena
+
+// ✅ Descripción formateada a partir del texto plano con saltos de línea
+const formattedDescription = computed(() => {
+  if (!props.description) return ''
+
+  return (
+    '<p>' +
+    props.description
+      .trim()
+      // Doble salto de línea => nuevo párrafo
+      .replace(/\n\s*\n/g, '</p><p>')
+      // Salto de línea simple => <br>
+      .replace(/\n/g, '<br>') +
+    '</p>'
+  )
+})
 
 function toggle() {
   open.value = !open.value
