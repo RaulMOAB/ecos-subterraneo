@@ -3,24 +3,17 @@ import HeroParallax from '@/components/HeroParallax.vue'
 import Section from '@/components/Section.vue'
 import Bee from '@/components/Bee.vue'
 import PathScroll from '@/components/PathScroll.vue'
+import SceneGallery from '@/components/SceneGallery.vue'
+import '@/styles/sceneGallery.css'
 </script>
 
 <template>
   <HeroParallax />
 
-  <Bee />
-  <PathScroll />
-
-  <!-- Sections -->
-  <main id="inicio" class="relative z-20">
-    <Section title="Entrada a la Torre Invertida">
-      Bienvenida/o a la galería. Desplázate para descender.
-    </Section>
-    <Section title="Pasillos de colmena">
-      Ámbar tenue y ecos metálicos guían el viaje.
-    </Section>
-    <Section title="Trono del monarca abeja">
-      El rumor de alas resuena en la piedra.
-    </Section>
-  </main>
+  <section id="galeria">
+    <!-- Aquí irá SceneGallery -->
+    <div id="escena-1">
+      <SceneGallery />
+    </div>
+  </section>
 </template>

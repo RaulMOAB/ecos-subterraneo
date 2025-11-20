@@ -15,7 +15,7 @@
     </div>
     <div class="parallax-dark-overlay" aria-hidden="true"></div>
     <!--capa oscura-->
-    <div class="parallax-slot">
+    <div class="parallax-slot" :style="{ zIndex: props.slotZ }">
       <slot />
     </div>
   </section>
@@ -30,6 +30,7 @@ const props = defineProps({
   layers: { type: Array, required: true },
   strength: { type: Number, default: 2.0 },
   clamp: { type: Boolean, default: true },
+  slotZ: { type: Number, default: 10 },
   lerp: { type: Number, default: 0.28 },
 })
 

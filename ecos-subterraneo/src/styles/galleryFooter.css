@@ -1,0 +1,98 @@
+/* --- CONTENEDOR GENERAL --- */
+.gallery-footer {
+  /* margin-top: 8rem;*/
+  /* padding: 6rem 0 8rem;*/
+  text-align: center;
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 1.2s ease, transform 1.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.gallery-footer.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* --- REMATE DEL PATH --- */
+.footer-core {
+  width: 26px;
+  height: 26px;
+  margin: 0 auto 1.5rem auto;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(245, 192, 90, 0.95) 0%,
+    rgba(245, 192, 90, 0.6) 40%,
+    rgba(245, 192, 90, 0.1) 70%,
+    transparent 100%
+  );
+  box-shadow: 0 0 18px rgba(245, 192, 90, 0.55),
+    0 0 32px rgba(245, 192, 90, 0.35), 0 0 48px rgba(245, 192, 90, 0.2);
+  animation: corePulse 3s ease-in-out infinite;
+}
+
+@keyframes corePulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 18px rgba(245, 192, 90, 0.55),
+      0 0 32px rgba(245, 192, 90, 0.35), 0 0 48px rgba(245, 192, 90, 0.2);
+  }
+  50% {
+    transform: scale(1.1);
+    box-shadow: 0 0 26px rgba(245, 192, 90, 0.75),
+      0 0 46px rgba(245, 192, 90, 0.55), 0 0 70px rgba(245, 192, 90, 0.3);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 18px rgba(245, 192, 90, 0.55),
+      0 0 32px rgba(245, 192, 90, 0.35), 0 0 48px rgba(245, 192, 90, 0.2);
+  }
+}
+
+/* --- TEXTO --- */
+.gallery-footer__text {
+  font-size: 1.2rem;
+  letter-spacing: 0.5px;
+  opacity: 0.9;
+}
+
+/* --- BOTÓN --- */
+.gallery-footer__button {
+  background: rgba(245, 192, 90, 0.12);
+  padding: 0.8rem 2rem;
+  border: 1px solid rgba(245, 192, 90, 0.35);
+  border-radius: 10px;
+  cursor: pointer;
+  color: #f5c05a;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.gallery-footer__button:hover {
+  background: rgba(245, 192, 90, 0.2);
+  box-shadow: 0 0 24px rgba(245, 192, 90, 0.3);
+  transform: translateY(-2px);
+}
+
+.gallery-footer.is-visible {
+  position: relative;
+}
+
+.gallery-footer.is-visible::before {
+  content: '';
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 20px;
+  background: linear-gradient(
+    to bottom,
+    rgba(245, 192, 90, 0.3) 0%,
+    rgba(245, 192, 90, 0) 100%
+  );
+  border-radius: 999px;
+}
