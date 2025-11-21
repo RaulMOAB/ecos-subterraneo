@@ -80,8 +80,10 @@ const goToGallery = () => {
   })
 }
 
-// "Comenzar descenso" solo hace scroll; el hero sigue sonando
+// "Comenzar descenso" solo hace scroll, el hero sigue sonando
 const handleStart = () => {
+  // reinicia la abeja para un nuevo recorrido
+  window.dispatchEvent(new CustomEvent('bee-restart'))
   goToGallery()
 }
 

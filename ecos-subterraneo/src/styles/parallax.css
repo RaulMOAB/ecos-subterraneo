@@ -19,6 +19,7 @@
   will-change: transform;
   backface-visibility: hidden;
   pointer-events: none;
+  transform: translate3d(0, 0, 0);
 }
 
 /* la imagen rellena el lienzo 16:9 sin deformarse */
@@ -31,6 +32,7 @@
   transform: translate3d(0, 0, 0);
   pointer-events: none;
   user-select: none;
+  will-change: transform;
 }
 
 .parallax-slot {
@@ -46,6 +48,9 @@
   inset: 0;
   z-index: 5; /* por encima de las capas (zIndex 1–3), por debajo del slot (z-index 10) */
   pointer-events: none;
+  will-change: opacity, transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 
   /* capa oscura suave, con un poquito de gradiente */
   background: radial-gradient(
