@@ -37,7 +37,7 @@ import GalleryFooter from './GalleryFooter.vue'
 import scene1Audio from '@/assets/audio/scene1.wav'
 import scene2Audio from '@/assets/audio/scene2.wav'
 import scene3Audio from '@/assets/audio/scene3.wav'
-import scene4Audio from '@/assets/audio/scene4.mp3'
+import scene4Audio from '@/assets/audio/scene4.wav'
 import scene5Audio from '@/assets/audio/final_battle.mp3' // por ejemplo, la escena final
 
 // Array paralelo de audios, en el mismo orden que tus escenas
