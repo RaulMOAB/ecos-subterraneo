@@ -185,6 +185,7 @@ export function usePathTrail() {
 
   /**
    * Posición de la abeja (scroll-driven).
+   * Con lógica de bucle al volver al inicio.
    */
   const updateBeePosition = () => {
     const svg = svgEl.value
@@ -193,12 +194,24 @@ export function usePathTrail() {
     // si está en animación automática, no la tocamos
     if (isBeeAutoFlying) return
 
-    // si está congelada al final, mantenerla fija
+    const currentScrollY = window.scrollY || window.pageYOffset
+
+    // si está congelada al final, mantenerla fija...
     if (freezeBeeAtEnd) {
-      beeX.value = trunkX.value
-      beeY.value = trunkEnd.value
-      beeAngle.value = 0
-      return
+      // ... salvo que el usuario haya vuelto arriba: reinicio implícito
+      if (currentScrollY < 200) {
+        freezeBeeAtEnd = false
+        beeX.value = trunkX.value
+        beeY.value = trunkStart.value
+        beeAngle.value = 0
+        svg.style.setProperty('--path-glow-intensity', '0.4')
+        lastScrollY = currentScrollY
+      } else {
+        beeX.value = trunkX.value
+        beeY.value = trunkEnd.value
+        beeAngle.value = 0
+        return
+      }
     }
 
     const svgRect = svg.getBoundingClientRect()
@@ -211,7 +224,6 @@ export function usePathTrail() {
     ySvg = Math.max(trunkStart.value, Math.min(ySvg, trunkEnd.value))
 
     // inclinación según cambio de scroll
-    const currentScrollY = window.scrollY || window.pageYOffset
     const delta = currentScrollY - lastScrollY
     lastScrollY = currentScrollY
 
@@ -301,6 +313,7 @@ export function usePathTrail() {
 
   /**
    * Reinicia la abeja para un nuevo recorrido desde el inicio del tronco.
+   * (si disparas el evento 'bee-restart' desde el footer, por ejemplo)
    */
   const resetBeeForNewRun = () => {
     const svg = svgEl.value
@@ -339,10 +352,23 @@ export function usePathTrail() {
    * Recalcula lo que depende del scroll:
    * - rama activa
    * - posición/ángulo de la abeja
+   * - dispara el vuelo automático al llegar al final (bucle)
    */
   const recalcOnScroll = () => {
     updateActiveBranch()
     updateBeePosition()
+
+    // NUEVO: si hemos llegado al final de la última escena, disparar vuelo
+    if (!branches.value.length) return
+    if (isBeeAutoFlying || freezeBeeAtEnd) return
+
+    const scrollY = window.scrollY || window.pageYOffset
+    const viewportBottomDoc = scrollY + window.innerHeight
+    const lastBranch = branches.value[branches.value.length - 1]
+
+    if (viewportBottomDoc >= lastBranch.bottomDoc) {
+      flyBeeToFooter()
+    }
   }
 
   /**
@@ -381,6 +407,7 @@ export function usePathTrail() {
   }
 
   const onFooterVisible = () => {
+    // sigue existiendo por compatibilidad, pero ya no dependes solo de él
     flyBeeToFooter()
   }
 
