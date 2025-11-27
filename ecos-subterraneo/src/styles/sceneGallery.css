@@ -4,7 +4,7 @@
 :root {
   --row-gap: clamp(80px, 12vh, 160px);
   --side-gutter: clamp(24px, 5vw, 64px);
-  --card-max: min(1000px, 94vw);
+  --card-max: min(750px, 94vw);
   --media-ratio: 4 / 3;
 }
 
