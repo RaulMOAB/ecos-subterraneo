@@ -41,7 +41,7 @@
         <image
           :href="beeUrl"
           x="-21"
-          y="-16"
+          y="-25"
           width="46"
           height="46"
           preserveAspectRatio="xMidYMid meet"

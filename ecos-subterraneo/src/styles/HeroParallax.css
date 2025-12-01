@@ -148,3 +148,19 @@
     justify-self: start;
   }
 }
+
+/* 📱 MÓVIL: mostrar solo el hero, sin parallax ni capas */
+
+/* 📱 Móvil: esconder el hero que está dentro del parallax */
+@media (max-width: 640px) {
+  .hero-parallax .hero,
+  .hero-parallax .hero-backdrop .hero-scene {
+    display: none !important;
+  }
+  .hero-backdrop {
+    border-radius: 0;
+  }
+  .hero-cta--desktop {
+    display: none;
+  }
+}

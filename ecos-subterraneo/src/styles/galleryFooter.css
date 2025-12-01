@@ -1,7 +1,5 @@
 /* --- CONTENEDOR GENERAL --- */
 .gallery-footer {
-  /* margin-top: 8rem;*/
-  /* padding: 6rem 0 8rem;*/
   text-align: center;
   opacity: 0;
   transform: translateY(40px);
@@ -9,6 +7,7 @@
   display: flex;
   flex-direction: column;
   gap: 2rem;
+  margin-top: 4rem;
 }
 
 .gallery-footer.is-visible {
@@ -95,4 +94,10 @@
     rgba(245, 192, 90, 0) 100%
   );
   border-radius: 999px;
+}
+
+@media (max-width: 640px) {
+  .gallery-footer {
+    gap: 0;
+  }
 }

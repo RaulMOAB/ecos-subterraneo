@@ -37,6 +37,19 @@ export function usePathTrail() {
   const getSceneCards = () =>
     Array.from(document.querySelectorAll('.scene-card'))
 
+  // 🔹 NUEVO: índice de la rama asociada a la card abierta (is-open)
+  const getOpenBranchIndex = () => {
+    const cards = getSceneCards()
+    if (!cards.length || !branches.value.length) return -1
+
+    const openIdx = cards.findIndex((card) =>
+      card.classList.contains('is-open'),
+    )
+
+    if (openIdx < 0 || openIdx >= branches.value.length) return -1
+    return openIdx
+  }
+
   /**
    * Calcula dónde debe empezar el tronco: justo después del heroIntroPanel.
    */
@@ -186,6 +199,7 @@ export function usePathTrail() {
   /**
    * Posición de la abeja (scroll-driven).
    * Con lógica de bucle al volver al inicio.
+   * 🔹 Ajuste: si hay una card abierta, la abeja se queda en la rama bifurcada de esa escena.
    */
   const updateBeePosition = () => {
     const svg = svgEl.value
@@ -219,6 +233,12 @@ export function usePathTrail() {
     // centro del viewport mapeado al SVG
     const viewportCenter = window.innerHeight / 2
     let ySvg = viewportCenter - svgRect.top
+
+    // 🔹 Si hay una card abierta, forzamos la Y de la rama correspondiente
+    const openBranchIdx = getOpenBranchIndex()
+    if (openBranchIdx >= 0 && branches.value[openBranchIdx]) {
+      ySvg = branches.value[openBranchIdx].ySvg
+    }
 
     // limitar al rango del tronco
     ySvg = Math.max(trunkStart.value, Math.min(ySvg, trunkEnd.value))

@@ -1,9 +1,14 @@
 <template>
-  <section class="scene-gallery-wrapper">
-    <!--<heroIntroPanel /> -->
+  <section
+    class="scene-gallery-wrapper relative w-full overflow-x-hidden bg-[#0b0b12] py-16 sm:py-20 lg:py-24"
+  >
+    <!-- El path puede ir por detrás; el posicionamiento lo controla su propio CSS -->
     <PathTrail />
 
-    <section class="scene-gallery" aria-label="Galería">
+    <section
+      class="scene-gallery mx-auto grid grid-cols-1 gap-y-16 sm:gap-y-20 lg:gap-y-24 px-4 sm:px-6 lg:px-8 max-w-5xl lg:max-w-6xl"
+      aria-label="Galería"
+    >
       <SceneCard
         v-for="(scene, i) in scenesWithAudio"
         :key="scene.id"
@@ -18,7 +23,11 @@
         :is-final="scene.isFinal"
       />
     </section>
-    <GalleryFooter />
+
+    <!-- Separación limpia del footer respecto a la última escena -->
+    <div class="mt-16 sm:mt-20">
+      <GalleryFooter />
+    </div>
   </section>
 </template>
 
@@ -30,17 +39,12 @@ import PathTrail from './PathTrail.vue'
 import { scenes as defaultScenes } from './scenesData.js'
 import GalleryFooter from './GalleryFooter.vue'
 
-/**
- * 1) Importa aquí los audios de cada escena
- *    Ajusta los nombres de archivo a los que tengas realmente en assets/audio
- */
 import scene1Audio from '@/assets/audio/scene1.wav'
 import scene2Audio from '@/assets/audio/scene2.wav'
 import scene3Audio from '@/assets/audio/scene3.wav'
 import scene4Audio from '@/assets/audio/scene4.wav'
-import scene5Audio from '@/assets/audio/final_battle.mp3' // por ejemplo, la escena final
+import scene5Audio from '@/assets/audio/final_battle.mp3'
 
-// Array paralelo de audios, en el mismo orden que tus escenas
 const sceneAudios = [
   scene1Audio,
   scene2Audio,
@@ -52,7 +56,6 @@ const sceneAudios = [
 const cardsObserver = ref(null)
 
 onMounted(() => {
-  // Seguridad: solo en entorno navegador
   if (typeof window === 'undefined') return
 
   const cards = document.querySelectorAll('.scene-card')
@@ -63,7 +66,6 @@ onMounted(() => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
           entry.target.classList.add('visible')
-          // Una vez visible, dejamos de observar esa card
           observer.unobserve(entry.target)
         }
       })
@@ -87,14 +89,8 @@ const props = defineProps({
   items: { type: Array, default: null },
 })
 
-// Escenas base: vienen de props o de scenesData
 const galleryScenes = computed(() => props.items ?? defaultScenes)
 
-/**
- * 2) Combinamos escenas + audios
- *    - audioSrc: la pista que usará SceneCard
- *    - isFinal: true solo en la última escena
- */
 const scenesWithAudio = computed(() =>
   galleryScenes.value.map((scene, index, arr) => ({
     ...scene,

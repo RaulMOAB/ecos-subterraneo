@@ -88,6 +88,21 @@
     );
   animation: branchPulse 2.2s ease-in-out infinite;
 }
+
+/* Tablet */
+@media (max-width: 1024px) {
+  .scene-path-bee > image {
+    height: 34px;
+  }
+}
+
+/* MÓVIL */
+@media (max-width: 640px) {
+  .scene-path-bee > image {
+    height: 26px;
+  }
+}
+
 /* Animación con pulso */
 @keyframes branchPulseStrong {
   0% {

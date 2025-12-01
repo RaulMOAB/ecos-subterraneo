@@ -94,26 +94,28 @@ const props = defineProps({
   anchor: { type: String, default: '' },
   ctaLabel: { type: String, default: '' },
   defaultOpen: { type: Boolean, default: false },
-  isOpen: {
-    type: Boolean,
-    default: false,
-  },
-  audioSrc: {
-    type: String,
-    default: null,
-  },
-  isFinal: {
-    type: Boolean,
-    default: false,
-  },
+  isOpen: { type: Boolean, default: false },
+  audioSrc: { type: String, default: null },
+  isFinal: { type: Boolean, default: false }, // escena final
 })
 
 const open = ref(props.defaultOpen || props.isOpen)
 const cardRef = ref(null)
 const sceneAudio = ref(null)
-const sceneAudioPlaying = ref(false) // estado de audio de esta escena
+const sceneAudioPlaying = ref(false)
 
-// ✅ Descripción formateada a partir del texto plano con saltos de línea
+// 🔊 volumen
+const SCENE_VOLUME_NORMAL = 0.35
+const SCENE_VOLUME_FINAL = 0.9
+
+function applySceneVolume() {
+  if (!sceneAudio.value) return
+  sceneAudio.value.volume = props.isFinal
+    ? SCENE_VOLUME_FINAL
+    : SCENE_VOLUME_NORMAL
+}
+
+// 📝 descripción formateada
 const formattedDescription = computed(() => {
   if (!props.description) return ''
 
@@ -121,9 +123,7 @@ const formattedDescription = computed(() => {
     '<p>' +
     props.description
       .trim()
-      // Doble salto de línea => nuevo párrafo
       .replace(/\n\s*\n/g, '</p><p>')
-      // Salto de línea simple => <br>
       .replace(/\n/g, '<br>') +
     '</p>'
   )
@@ -133,7 +133,7 @@ function toggle() {
   open.value = !open.value
 }
 
-/** Última escena => sin botón Seguir */
+// ¿es la última escena?
 const isLast = computed(() => {
   const card = cardRef.value
   if (!card) return false
@@ -143,29 +143,7 @@ const isLast = computed(() => {
   return idx === cards.length - 1
 })
 
-/** Scroll suave a la siguiente escena */
-function goNext() {
-  const current = cardRef.value
-  if (!current) return
-
-  const gallery = current.closest('.scene-gallery') || document
-  const cards = Array.from(gallery.querySelectorAll('.scene-card'))
-  const idx = cards.indexOf(current)
-  const next = cards[idx + 1]
-  if (!next) return
-
-  // cerrar la escena actual
-  open.value = false
-
-  // esperar a que el layout se estabilice y luego hacer scroll
-  waitForStableTop(next).then((absTop) => {
-    const header = document.querySelector('.site-header, header')
-    const headerH = header?.offsetHeight || 0
-    const pad = Math.max(24, window.innerHeight * 0.08)
-    const targetY = Math.max(0, absTop - headerH - pad)
-    smoothScrollTo(targetY, { duration: 900 })
-  })
-}
+/* ---------- helpers de scroll ---------- */
 
 function waitForStableTop(el, { framesStable = 4, maxFrames = 40 } = {}) {
   return new Promise((resolve) => {
@@ -223,10 +201,72 @@ function smoothScrollTo(targetY, { duration = 900 } = {}) {
   requestAnimationFrame(raf)
 }
 
-/* ==== AUDIO DE ESCENA + COMUNICACIÓN CON EL HERO ==== */
+/** centra una card en el viewport → la abeja queda en el centro de esa escena */
+function scrollCardCenterIntoViewport(el, { duration = 900 } = {}) {
+  if (!el || typeof window === 'undefined') return
+
+  return waitForStableTop(el).then(() => {
+    const rect = el.getBoundingClientRect()
+    const cardCenterDoc = rect.top + window.pageYOffset + rect.height / 2
+
+    const viewportCenter = window.innerHeight / 2
+    const targetY = cardCenterDoc - viewportCenter
+
+    smoothScrollTo(targetY, { duration })
+  })
+}
+
+/* ---------- comportamiento de navegación ---------- */
+
+/** Botón "Seguir": centra la siguiente escena (desktop + móvil) */
+function goNext() {
+  const current = cardRef.value
+  if (!current) return
+
+  const gallery = current.closest('.scene-gallery') || document
+  const cards = Array.from(gallery.querySelectorAll('.scene-card'))
+  const idx = cards.indexOf(current)
+  const next = cards[idx + 1]
+  if (!next) return
+
+  // cerrar la escena actual
+  open.value = false
+
+  // centrar la siguiente escena
+  scrollCardCenterIntoViewport(next, { duration: 900 })
+}
+
+/** Móvil: al cerrar manualmente, centramos la escena cerrada */
+function recenterBeeOnClosedSceneMobile() {
+  if (typeof window === 'undefined') return
+  const isMobile =
+    window.matchMedia && window.matchMedia('(max-width: 640px)').matches
+  if (!isMobile) return
+
+  const card = cardRef.value
+  if (!card) return
+
+  scrollCardCenterIntoViewport(card, { duration: 600 })
+}
+
+/** Móvil: al abrir, centramos la escena abierta (para que la abeja se sitúe en medio) */
+function recenterBeeOnOpenMobile() {
+  if (typeof window === 'undefined') return
+  const isMobile =
+    window.matchMedia && window.matchMedia('(max-width: 640px)').matches
+  if (!isMobile) return
+
+  const card = cardRef.value
+  if (!card) return
+
+  scrollCardCenterIntoViewport(card, { duration: 650 })
+}
+
+/* ---------- AUDIO + eventos globales ---------- */
 
 function playSceneAudio() {
   if (!sceneAudio.value) return
+  applySceneVolume()
   sceneAudio.value.currentTime = 0
   sceneAudio.value.play()
   sceneAudioPlaying.value = true
@@ -239,7 +279,6 @@ function stopSceneAudio() {
   sceneAudioPlaying.value = false
 }
 
-// toggle solo del audio de la escena (no abre/cierra la card)
 function toggleSceneAudio() {
   if (!sceneAudio.value) return
   if (sceneAudioPlaying.value) {
@@ -249,12 +288,10 @@ function toggleSceneAudio() {
   }
 }
 
-// cuando cambia `open`, gestionamos audio + eventos del hero
 watch(
   open,
   (isNowOpen) => {
     if (isNowOpen) {
-      // reproducir audio de la escena si existe
       if (props.audioSrc) {
         playSceneAudio()
       }
@@ -264,13 +301,18 @@ watch(
       } else {
         window.dispatchEvent(new CustomEvent('scene-opened'))
       }
+
+      // 👉 móvil: al abrir, centramos la escena
+      recenterBeeOnOpenMobile()
     } else {
-      // al cerrar, parar audio de escena
       stopSceneAudio()
 
       if (!props.isFinal) {
         window.dispatchEvent(new CustomEvent('scene-closed'))
       }
+
+      // 👉 móvil: al cerrar, centramos la escena
+      recenterBeeOnClosedSceneMobile()
     }
   },
   { immediate: false },
