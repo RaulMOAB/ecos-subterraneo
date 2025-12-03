@@ -206,3 +206,38 @@ button,
     opacity: 0.55;
   }
 }
+
+/* ===== Ajustes móviles ===== */
+@media (max-width: 640px) {
+  /* La card ocupa todo el ancho y las escenas quedan más juntas */
+  .scene-card {
+    padding: 0;
+    margin-left: 0;
+    margin-right: 0;
+    width: 100%;
+    margin-bottom: 1.4rem; /* separa pero mucho menos que antes */
+  }
+
+  /* El contenedor de la imagen sin paddings y con poco espacio hacia el CTA */
+  .scene-card .scene-media {
+    padding: 0;
+    margin: 0 0 0.8rem;
+  }
+
+  /* La imagen ocupa exactamente el ancho, sin espacios laterales */
+  .scene-card .scene-media .scene-img {
+    width: 100%;
+    display: block;
+    margin: 0;
+    border-radius: 1rem;
+  }
+
+  /* CTA más compacto para reducir altura entre escenas */
+  .scene-card .scene-cta {
+    padding-block: 0.6rem;
+    padding-inline: 1.4rem;
+    font-size: 0.9rem;
+    margin-top: 0.6rem;
+    margin-bottom: 0.2rem;
+  }
+}

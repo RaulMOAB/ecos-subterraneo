@@ -288,3 +288,49 @@
     display: none;
   }
 }
+
+/* ===== Ajustes móviles ===== */
+@media (max-width: 640px) {
+  /* La galería pasa a ser una columna con gap controlado */
+  .scene-gallery {
+    display: flex;
+    flex-direction: column;
+    gap: 4rem; /* distancia real entre articles */
+  }
+
+  /* Cada article ocupa todo el ancho y SIN márgenes propios */
+  .scene-card {
+    padding: 0;
+    padding-top: 2rem;
+    margin: 0 !important; /* nos imponemos a otros CSS */
+    width: 100%;
+  }
+
+  /* Un pequeño espacio sólo al final de la lista */
+  .scene-card:last-child {
+    margin-bottom: 1.5rem !important;
+  }
+
+  /* El contenedor de la imagen sin paddings y con poco espacio hacia el CTA */
+  .scene-card .scene-media {
+    padding: 0;
+    margin: 0 0 0.6rem;
+  }
+
+  /* La imagen ocupa exactamente el ancho, sin espacios laterales */
+  .scene-card .scene-media .scene-img {
+    width: 100%;
+    display: block;
+    margin: 0;
+    border-radius: 1rem;
+  }
+
+  /* CTA más compacto para reducir altura entre escenas */
+  .scene-card .scene-cta {
+    padding-block: 0.6rem;
+    padding-inline: 1.4rem;
+    font-size: 0.9rem;
+    margin-top: 0.4rem;
+    margin-bottom: 0.1rem;
+  }
+}
