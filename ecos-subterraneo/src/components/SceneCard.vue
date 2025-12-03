@@ -80,7 +80,6 @@
 
 <script setup>
 import { ref, computed, watch, onBeforeUnmount } from 'vue'
-
 import soundOnUrl from '@/assets/resources/sound-on.png'
 import soundOffUrl from '@/assets/resources/sound-off.png'
 
@@ -201,24 +200,8 @@ function smoothScrollTo(targetY, { duration = 900 } = {}) {
   requestAnimationFrame(raf)
 }
 
-/** centra una card en el viewport → la abeja queda en el centro de esa escena */
-function scrollCardCenterIntoViewport(el, { duration = 900 } = {}) {
-  if (!el || typeof window === 'undefined') return
-
-  return waitForStableTop(el).then(() => {
-    const rect = el.getBoundingClientRect()
-    const cardCenterDoc = rect.top + window.pageYOffset + rect.height / 2
-
-    const viewportCenter = window.innerHeight / 2
-    const targetY = cardCenterDoc - viewportCenter
-
-    smoothScrollTo(targetY, { duration })
-  })
-}
-
 /* ---------- comportamiento de navegación ---------- */
 
-/** Botón "Seguir": centra la siguiente escena (desktop + móvil) */
 function goNext() {
   const current = cardRef.value
   if (!current) return
@@ -229,37 +212,43 @@ function goNext() {
   const next = cards[idx + 1]
   if (!next) return
 
-  // cerrar la escena actual
+  // 1) cerrar la escena actual
   open.value = false
 
-  // centrar la siguiente escena
-  scrollCardCenterIntoViewport(next, { duration: 900 })
-}
-
-/** Móvil: al cerrar manualmente, centramos la escena cerrada */
-function recenterBeeOnClosedSceneMobile() {
-  if (typeof window === 'undefined') return
+  // 2) detectar si estamos en móvil
   const isMobile =
-    window.matchMedia && window.matchMedia('(max-width: 640px)').matches
-  if (!isMobile) return
+    typeof window !== 'undefined' &&
+    window.matchMedia &&
+    window.matchMedia('(max-width: 640px)').matches
 
-  const card = cardRef.value
-  if (!card) return
+  // 3) esperar a que la siguiente card tenga su posición estabilizada
+  waitForStableTop(next).then(() => {
+    const rect = next.getBoundingClientRect()
+    const topDoc = rect.top + window.pageYOffset
 
-  scrollCardCenterIntoViewport(card, { duration: 600 })
-}
+    if (isMobile) {
+      // 📱 MÓVIL:
+      // ir a la siguiente escena, pero MANTENERLA CERRADA.
+      // Solo desplazamos el scroll para que quede en zona cómoda.
+      const header = document.querySelector('.site-header, header')
+      const headerH = header?.offsetHeight || 0
+      const pad = Math.max(16, window.innerHeight * 0.06)
+      const targetY = Math.max(0, topDoc - headerH - pad)
 
-/** Móvil: al abrir, centramos la escena abierta (para que la abeja se sitúe en medio) */
-function recenterBeeOnOpenMobile() {
-  if (typeof window === 'undefined') return
-  const isMobile =
-    window.matchMedia && window.matchMedia('(max-width: 640px)').matches
-  if (!isMobile) return
+      smoothScrollTo(targetY, { duration: 700 })
+      return
+    }
 
-  const card = cardRef.value
-  if (!card) return
+    // 💻 ESCRITORIO:
+    // centramos la siguiente escena en el viewport para que la abeja
+    // quede en la bifurcación de su rama.
+    const cardCenterDoc = topDoc + rect.height / 2
+    const viewportCenter = window.innerHeight / 2
 
-  scrollCardCenterIntoViewport(card, { duration: 650 })
+    const targetY = cardCenterDoc - viewportCenter
+
+    smoothScrollTo(targetY, { duration: 900 })
+  })
 }
 
 /* ---------- AUDIO + eventos globales ---------- */
@@ -301,18 +290,12 @@ watch(
       } else {
         window.dispatchEvent(new CustomEvent('scene-opened'))
       }
-
-      // 👉 móvil: al abrir, centramos la escena
-      recenterBeeOnOpenMobile()
     } else {
       stopSceneAudio()
 
       if (!props.isFinal) {
         window.dispatchEvent(new CustomEvent('scene-closed'))
       }
-
-      // 👉 móvil: al cerrar, centramos la escena
-      recenterBeeOnClosedSceneMobile()
     }
   },
   { immediate: false },

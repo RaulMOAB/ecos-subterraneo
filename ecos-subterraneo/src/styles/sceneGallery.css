@@ -275,3 +275,16 @@
 .scene-card.is-open .scene-media {
   box-shadow: none;
 }
+
+/* PathTrail solo en tablet/escritorio */
+@media (max-width: 640px) {
+  .path-trail-wrapper {
+    display: none;
+  }
+  .footer-core {
+    display: none;
+  }
+  .gallery-footer.is-visible::before {
+    display: none;
+  }
+}
