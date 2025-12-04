@@ -8,6 +8,16 @@
   --media-ratio: 4 / 3;
 }
 
+/* Mientras está el hero, ocultamos path + abeja */
+body[data-hero-stage='intro'] .path-trail-wrapper {
+  opacity: 0;
+}
+
+/* Una vez el usuario está en la galería, mostramos el path */
+body[data-hero-stage='gallery'] .path-trail-wrapper {
+  opacity: 1;
+}
+
 /* =========================================================
    CONTENEDOR DE LA GALERÍA
    ========================================================= */
@@ -274,6 +284,13 @@
 /* En abierto, la sombra la pone la card, no la imagen */
 .scene-card.is-open .scene-media {
   box-shadow: none;
+}
+.path-trail-wrapper {
+  position: fixed; /* o absolute si lo tienes así, pero fija en viewport suele ir mejor */
+  inset: 0;
+  pointer-events: none;
+  z-index: 5; /* ⬅ por debajo de .hero-wrapper (20) */
+  transition: opacity 0.2s linear;
 }
 
 /* PathTrail solo en tablet/escritorio */

@@ -1,4 +1,11 @@
 /* parallax.css */
+.hero-wrapper {
+  position: relative;
+  width: 100%;
+  transition: opacity 0.2s linear, transform 0.2s linear;
+  will-change: opacity, transform;
+  z-index: 20;
+}
 
 .parallax-scene {
   position: relative;

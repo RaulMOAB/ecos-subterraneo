@@ -1,5 +1,6 @@
 <template>
-  <section>
+  <!-- ⬇️ ahora el section tiene clase y estilo reactivo -->
+  <section class="hero-wrapper" :style="heroStyle">
     <!-- AUDIO DE FONDO (COMÚN A AMBAS VERSIONES) -->
     <audio ref="introAudio" :src="introAudioUrl" loop></audio>
 
@@ -96,7 +97,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
 import ParallaxLayers from './ParallaxLayers.vue'
 import '../styles/HeroParallax.css'
 import { useHeroParallax } from './heroParallaxLogic.js'
@@ -119,10 +120,21 @@ const {
 const introAudio = ref(null)
 const isMobile = ref(false)
 
+// ⬇️ Estado del fade del hero
+const heroOpacity = ref(1)
+const heroTranslateY = ref(0)
+const FADE_DISTANCE = 320 // píxeles de scroll para desaparecer del todo
+
 const updateIsMobile = () => {
   if (typeof window === 'undefined') return
   isMobile.value = window.matchMedia('(max-width: 640px)').matches
 }
+
+// ⬇️ Estilo reactivo aplicado al <section>
+const heroStyle = computed(() => ({
+  opacity: heroOpacity.value,
+  transform: `translateY(${heroTranslateY.value}px)`,
+}))
 
 const goToGalleryTop = () => {
   const el = document.getElementById('galeria')
@@ -214,30 +226,22 @@ const centerFirstScene = () => {
   })
 }
 
-// "Comenzar descenso": en escritorio centra la primera escena;
-// en móvil el botón no se muestra
-const handleStart = () => {
-  // reinicia la abeja para un nuevo recorrido
-  window.dispatchEvent(new CustomEvent('bee-restart'))
+// "Comenzar descenso": reinicia la abeja y centra la primera escena
+const HERO_HIDE_PATH_THRESHOLD = 0.8 // 0–1: porcentaje del fade donde aún ocultamos el path
 
-  // buscamos la primera escena
-  const firstCard = document.querySelector('.scene-gallery .scene-card')
-  if (!firstCard) {
-    // fallback: scroll al inicio de la galería como antes
-    goToGallery()
-    return
+const handleScroll = () => {
+  const scrollY = window.scrollY || window.pageYOffset || 0
+  const progress = Math.min(Math.max(scrollY / FADE_DISTANCE, 0), 1)
+
+  heroOpacity.value = 1 - progress
+  heroTranslateY.value = -progress * 40
+
+  // Mientras el hero sigue siendo relevante, ocultamos path + abeja
+  if (progress < HERO_HIDE_PATH_THRESHOLD) {
+    document.body.dataset.heroStage = 'intro'
+  } else {
+    document.body.dataset.heroStage = 'gallery'
   }
-
-  // centramos la primera escena en el viewport
-  const rect = firstCard.getBoundingClientRect()
-  const cardCenterDoc = rect.top + window.pageYOffset + rect.height / 2
-  const viewportCenter = window.innerHeight / 2
-  const targetY = cardCenterDoc - viewportCenter
-
-  window.scrollTo({
-    top: targetY,
-    behavior: 'smooth',
-  })
 }
 
 // botón de sonido (activa/desactiva, con fade in en la primera vez)
@@ -254,36 +258,16 @@ let resizeHandler
 
 onMounted(() => {
   updateIsMobile()
+  window.addEventListener('scroll', handleScroll, { passive: true })
 
-  resizeHandler = () => {
-    updateIsMobile()
-  }
-  window.addEventListener('resize', resizeHandler)
-
-  onSceneOpened = () => {
-    if (introAudio.value) {
-      duckHeroAudio(introAudio.value)
-    }
-  }
-
-  onSceneClosed = () => {
-    if (introAudio.value) {
-      restoreHeroAudio(introAudio.value)
-    }
-  }
-
-  onFinalSceneOpened = () => {
-    if (introAudio.value) {
-      stopHeroAudio(introAudio.value)
-    }
-  }
-
-  window.addEventListener('scene-opened', onSceneOpened)
-  window.addEventListener('scene-closed', onSceneClosed)
-  window.addEventListener('final-scene-open', onFinalSceneOpened)
+  handleScroll()
+  document.body.dataset.heroStage = 'intro'
 })
 
 onBeforeUnmount(() => {
+  window.removeEventListener('scroll', handleScroll)
+  delete document.body.dataset.heroStage
+
   if (resizeHandler) {
     window.removeEventListener('resize', resizeHandler)
   }
