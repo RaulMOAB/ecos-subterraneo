@@ -1,5 +1,5 @@
 <template>
-  <!-- ⬇️ ahora el section tiene clase y estilo reactivo -->
+  <!-- Contenedor principal del hero con fade al hacer scroll -->
   <section class="hero-wrapper" :style="heroStyle">
     <!-- AUDIO DE FONDO (COMÚN A AMBAS VERSIONES) -->
     <audio ref="introAudio" :src="introAudioUrl" loop></audio>
@@ -108,6 +108,7 @@ import introAudioUrl from '@/assets/audio/intro.mp3'
 import soundOnUrl from '@/assets/resources/sound-on.png'
 import soundOffUrl from '@/assets/resources/sound-off.png'
 
+// Lógica compartida del parallax + audio del hero
 const {
   layers,
   isAudioPlaying,
@@ -120,22 +121,42 @@ const {
 const introAudio = ref(null)
 const isMobile = ref(false)
 
-// ⬇️ Estado del fade del hero
+// Estado para el fade del hero
 const heroOpacity = ref(1)
 const heroTranslateY = ref(0)
-const FADE_DISTANCE = 320 // píxeles de scroll para desaparecer del todo
+
+// Distancia de scroll en la que el hero desaparece
+const FADE_DISTANCE = 320 // px
+const HERO_HIDE_PATH_THRESHOLD = 0.8 // 0–1: a partir de aquí mostramos path/abeja
 
 const updateIsMobile = () => {
   if (typeof window === 'undefined') return
   isMobile.value = window.matchMedia('(max-width: 640px)').matches
 }
 
-// ⬇️ Estilo reactivo aplicado al <section>
+// Handler de scroll: controla el fade del hero y el estado del path
+const handleScroll = () => {
+  const scrollY = window.scrollY || window.pageYOffset || 0
+  const progress = Math.min(Math.max(scrollY / FADE_DISTANCE, 0), 1)
+
+  heroOpacity.value = 1 - progress
+  heroTranslateY.value = -progress * 40 // desplazamiento suave hacia arriba
+
+  // Mientras el hero es relevante, ocultamos el path/abeja
+  if (progress < HERO_HIDE_PATH_THRESHOLD) {
+    document.body.dataset.heroStage = 'intro'
+  } else {
+    document.body.dataset.heroStage = 'gallery'
+  }
+}
+
+// Estilo reactivo aplicado al contenedor del hero
 const heroStyle = computed(() => ({
   opacity: heroOpacity.value,
   transform: `translateY(${heroTranslateY.value}px)`,
 }))
 
+// Scroll directo al inicio de la galería (fallback)
 const goToGalleryTop = () => {
   const el = document.getElementById('galeria')
   if (!el) return
@@ -146,7 +167,7 @@ const goToGalleryTop = () => {
   })
 }
 
-/** helper local para esperar a que se estabilice la primera escena */
+/** Espera a que la posición de un elemento se estabilice antes de medir */
 const waitForStableTop = (el, { framesStable = 4, maxFrames = 40 } = {}) =>
   new Promise((resolve) => {
     let last = null
@@ -175,6 +196,7 @@ const waitForStableTop = (el, { framesStable = 4, maxFrames = 40 } = {}) =>
     requestAnimationFrame(step)
   })
 
+// Scroll suave a una posición concreta
 const smoothScrollTo = (targetY, { duration = 900 } = {}) => {
   const reduce =
     window.matchMedia &&
@@ -227,30 +249,21 @@ const centerFirstScene = () => {
 }
 
 // "Comenzar descenso": reinicia la abeja y centra la primera escena
-const HERO_HIDE_PATH_THRESHOLD = 0.8 // 0–1: porcentaje del fade donde aún ocultamos el path
+const handleStart = () => {
+  // reinicia la abeja para un nuevo recorrido
+  window.dispatchEvent(new CustomEvent('bee-restart'))
 
-const handleScroll = () => {
-  const scrollY = window.scrollY || window.pageYOffset || 0
-  const progress = Math.min(Math.max(scrollY / FADE_DISTANCE, 0), 1)
-
-  heroOpacity.value = 1 - progress
-  heroTranslateY.value = -progress * 40
-
-  // Mientras el hero sigue siendo relevante, ocultamos path + abeja
-  if (progress < HERO_HIDE_PATH_THRESHOLD) {
-    document.body.dataset.heroStage = 'intro'
-  } else {
-    document.body.dataset.heroStage = 'gallery'
-  }
+  // centra la primera escena en el viewport
+  centerFirstScene()
 }
 
-// botón de sonido (activa/desactiva, con fade in en la primera vez)
+// Botón de sonido: activa/desactiva el audio del hero
 const handleToggleAudio = () => {
   if (!introAudio.value) return
   toggleAudio(introAudio.value)
 }
 
-// manejadores de eventos globales lanzados por las cards
+// Manejadores de eventos globales lanzados por las cards
 let onSceneOpened
 let onSceneClosed
 let onFinalSceneOpened
@@ -258,15 +271,44 @@ let resizeHandler
 
 onMounted(() => {
   updateIsMobile()
-  window.addEventListener('scroll', handleScroll, { passive: true })
 
-  handleScroll()
+  // Listener de scroll para el fade del hero
+  window.addEventListener('scroll', handleScroll, { passive: true })
+  handleScroll() // sincroniza estado inicial
   document.body.dataset.heroStage = 'intro'
+
+  // Listener de resize para cambiar entre mobile / desktop
+  resizeHandler = () => {
+    updateIsMobile()
+  }
+  window.addEventListener('resize', resizeHandler)
+
+  // Eventos desde las tarjetas de escena para ducking del audio
+  onSceneOpened = () => {
+    if (introAudio.value) {
+      duckHeroAudio(introAudio.value)
+    }
+  }
+
+  onSceneClosed = () => {
+    if (introAudio.value) {
+      restoreHeroAudio(introAudio.value)
+    }
+  }
+
+  onFinalSceneOpened = () => {
+    if (introAudio.value) {
+      stopHeroAudio(introAudio.value)
+    }
+  }
+
+  window.addEventListener('scene-opened', onSceneOpened)
+  window.addEventListener('scene-closed', onSceneClosed)
+  window.addEventListener('final-scene-open', onFinalSceneOpened)
 })
 
 onBeforeUnmount(() => {
   window.removeEventListener('scroll', handleScroll)
-  delete document.body.dataset.heroStage
 
   if (resizeHandler) {
     window.removeEventListener('resize', resizeHandler)
@@ -280,5 +322,7 @@ onBeforeUnmount(() => {
   if (onFinalSceneOpened) {
     window.removeEventListener('final-scene-open', onFinalSceneOpened)
   }
+
+  delete document.body.dataset.heroStage
 })
 </script>
