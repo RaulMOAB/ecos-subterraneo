@@ -29,18 +29,13 @@ import SceneCard from './SceneCard.vue'
 import PathTrail from './PathTrail.vue'
 import { scenes as defaultScenes } from './scenesData.js'
 import GalleryFooter from './GalleryFooter.vue'
-
-/**
- * 1) Importa aquí los audios de cada escena
- *    Ajusta los nombres de archivo a los que tengas realmente en assets/audio
- */
 import scene1Audio from '@/assets/audio/scene1.wav'
 import scene2Audio from '@/assets/audio/scene2.wav'
 import scene3Audio from '@/assets/audio/scene3.wav'
 import scene4Audio from '@/assets/audio/scene4.wav'
-import scene5Audio from '@/assets/audio/final_battle.mp3' // por ejemplo, la escena final
+import scene5Audio from '@/assets/audio/final_battle.mp3'
 
-// Array paralelo de audios, en el mismo orden que tus escenas
+// Array paralelo de audios, en el mismo orden que las escenas
 const sceneAudios = [
   scene1Audio,
   scene2Audio,

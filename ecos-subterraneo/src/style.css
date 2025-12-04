@@ -36,6 +36,26 @@ body {
   font-family: var(--font-sans);
   font-size: 16px;
   line-height: 1.6;
+  background:
+    /* 1. Halo frío superior (luz lejana) */ radial-gradient(
+      circle at 50% 8%,
+      rgba(120, 180, 255, 0.2),
+      transparent 55%
+    ),
+    /* 3. Degradado abisal: cuanto más abajo, más oscuro */
+      linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.65) 0%,
+        rgba(0, 0, 0, 0.8) 40%,
+        rgba(0, 0, 0, 0.92) 70%,
+        rgba(0, 0, 0, 1) 100%
+      ),
+    /* Capa 1: la imagen base */ url('../src/assets/fondo.svg');
+
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center top;
+  background-attachment: fixed; /* efecto sutil tipo parallax */
 }
 
 html,
@@ -43,7 +63,7 @@ body,
 #app {
   height: auto;
   min-height: 100vh;
-  background: #0b0b12;
+  /* background: #0b0b12;*/
   color: #e7e5e4;
 }
 
@@ -90,7 +110,7 @@ button,
   background: radial-gradient(
     circle at 50% 30%,
     rgba(255, 220, 150, 0) 0%,
-    rgba(255, 220, 150, 0.02) 40%,
+    rgba(255, 220, 150, 0.02) 80%,
     rgba(0, 0, 0, 0.9) 100%
   );
   z-index: -1;
@@ -209,6 +229,27 @@ button,
 
 /* ===== Ajustes móviles ===== */
 @media (max-width: 640px) {
+  body {
+    background:
+      /* Más oscuridad en la parte baja en móviles */ linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.75) 0%,
+        rgba(0, 0, 0, 0.9) 45%,
+        rgba(0, 0, 0, 0.98) 100%
+      ),
+      /* Reforzamos el tinte frío pero suave */
+        radial-gradient(
+          circle at 50% 10%,
+          rgba(120, 180, 255, 0.18),
+          transparent 55%
+        ),
+      url('../src/assets/fondo.svg');
+
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center top;
+    background-attachment: scroll; /* en móvil mejor evitar fixed para rendimiento */
+  }
   /* La card ocupa todo el ancho y las escenas quedan más juntas */
   .scene-card {
     padding: 0;

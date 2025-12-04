@@ -302,10 +302,13 @@
   .scene-card {
     padding: 0;
     padding-top: 2rem;
-    margin: 0 !important; /* nos imponemos a otros CSS */
+    margin: top 2rem;
+    margin: 0 !important;
     width: 100%;
   }
-
+  .scene-card.is-open {
+    margin-top: 2rem !important;
+  }
   /* Un pequeño espacio sólo al final de la lista */
   .scene-card:last-child {
     margin-bottom: 1.5rem !important;

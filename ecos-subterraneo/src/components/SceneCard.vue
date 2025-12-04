@@ -212,39 +212,50 @@ function goNext() {
   const next = cards[idx + 1]
   if (!next) return
 
-  // 1) cerrar la escena actual
+  // cerrar la escena actual
   open.value = false
 
-  // 2) detectar si estamos en móvil
   const isMobile =
     typeof window !== 'undefined' &&
     window.matchMedia &&
     window.matchMedia('(max-width: 640px)').matches
 
-  // 3) esperar a que la siguiente card tenga su posición estabilizada
   waitForStableTop(next).then(() => {
     const rect = next.getBoundingClientRect()
     const topDoc = rect.top + window.pageYOffset
 
     if (isMobile) {
-      // 📱 MÓVIL:
-      // ir a la siguiente escena, pero MANTENERLA CERRADA.
-      // Solo desplazamos el scroll para que quede en zona cómoda.
+      // 📱 MÓVIL: scroll suave + fade-in ligero de la siguiente escena
+
       const header = document.querySelector('.site-header, header')
       const headerH = header?.offsetHeight || 0
       const pad = Math.max(16, window.innerHeight * 0.06)
       const targetY = Math.max(0, topDoc - headerH - pad)
 
-      smoothScrollTo(targetY, { duration: 700 })
+      // estado inicial del fade-in
+      next.style.opacity = '0'
+      next.style.transform = 'translateY(28px)'
+      next.style.transition =
+        'opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1), ' +
+        'transform 0.55s cubic-bezier(0.22, 1, 0.36, 1)'
+
+      // lanzamos el scroll
+      smoothScrollTo(targetY, { duration: 650 })
+
+      // en el siguiente frame, activamos la animación hacia el estado normal
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          next.style.opacity = '1'
+          next.style.transform = 'translateY(0)'
+        })
+      })
+
       return
     }
 
-    // 💻 ESCRITORIO:
-    // centramos la siguiente escena en el viewport para que la abeja
-    // quede en la bifurcación de su rama.
+    // 💻 ESCRITORIO: centramos la siguiente escena en el viewport
     const cardCenterDoc = topDoc + rect.height / 2
     const viewportCenter = window.innerHeight / 2
-
     const targetY = cardCenterDoc - viewportCenter
 
     smoothScrollTo(targetY, { duration: 900 })
