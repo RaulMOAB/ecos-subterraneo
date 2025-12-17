@@ -58,7 +58,7 @@
 
     <!-- ⬇️ BOTONES ABAJO Y CENTRADOS (cuando está abierta) -->
     <div v-if="open" class="scene-actions">
-      <button class="sc-btn sc-ghost" type="button" @click="open = false">
+      <button class="sc-btn sc-ghost" type="button" @click="closeScene()">
         Ocultar descripción
       </button>
 
@@ -77,7 +77,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onBeforeUnmount } from 'vue'
+import { ref, computed, watch, onBeforeUnmount, nextTick } from 'vue'
 import soundOnUrl from '@/assets/resources/sound-on.png'
 import soundOffUrl from '@/assets/resources/sound-off.png'
 
@@ -87,13 +87,13 @@ const props = defineProps({
   image: { type: String, required: true },
   alt: { type: String, default: '' },
   kicker: { type: String, default: '' },
-  layout: { type: String, default: 'left' }, // 'left' | 'right' | 'center'
+  layout: { type: String, default: 'left' },
   anchor: { type: String, default: '' },
   ctaLabel: { type: String, default: '' },
   defaultOpen: { type: Boolean, default: false },
   isOpen: { type: Boolean, default: false },
   audioSrc: { type: String, default: null },
-  isFinal: { type: Boolean, default: false }, // escena final
+  isFinal: { type: Boolean, default: false },
 })
 
 const open = ref(props.defaultOpen || props.isOpen)
@@ -115,7 +115,6 @@ function applySceneVolume() {
 // 📝 descripción formateada
 const formattedDescription = computed(() => {
   if (!props.description) return ''
-
   return (
     '<p>' +
     props.description
@@ -125,10 +124,6 @@ const formattedDescription = computed(() => {
     '</p>'
   )
 })
-
-function toggle() {
-  open.value = !open.value
-}
 
 // ¿es la última escena?
 const isLast = computed(() => {
@@ -152,19 +147,13 @@ function waitForStableTop(el, { framesStable = 4, maxFrames = 40 } = {}) {
       frames++
       const now = el.getBoundingClientRect().top + window.pageYOffset
 
-      if (last != null && Math.abs(now - last) < 1) {
-        stable++
-      } else {
-        stable = 0
-      }
+      if (last != null && Math.abs(now - last) < 1) stable++
+      else stable = 0
 
       last = now
 
-      if (stable >= framesStable || frames >= maxFrames) {
-        resolve(now)
-      } else {
-        requestAnimationFrame(step)
-      }
+      if (stable >= framesStable || frames >= maxFrames) resolve(now)
+      else requestAnimationFrame(step)
     }
 
     requestAnimationFrame(step)
@@ -198,6 +187,49 @@ function smoothScrollTo(targetY, { duration = 900 } = {}) {
   requestAnimationFrame(raf)
 }
 
+/* ---------- NUEVO: cerrar y restaurar scroll en móvil ---------- */
+
+async function restoreScrollToSelf() {
+  const el = cardRef.value
+  if (!el) return
+
+  const isMobile =
+    typeof window !== 'undefined' &&
+    window.matchMedia &&
+    window.matchMedia('(max-width: 640px)').matches
+
+  if (!isMobile) return
+
+  // Esperamos a que el panel colapse (cambio de altura real del DOM)
+  await nextTick()
+
+  // Medimos posición estable tras el colapso
+  const topDoc = await waitForStableTop(el)
+
+  // Ajuste para header fijo (si existe) + padding agradable
+  const header = document.querySelector('.site-header, header')
+  const headerH = header?.offsetHeight || 0
+  const pad = Math.max(16, window.innerHeight * 0.06)
+
+  const targetY = Math.max(0, topDoc - headerH - pad)
+  smoothScrollTo(targetY, { duration: 550 })
+}
+
+function closeScene({ restore = true } = {}) {
+  if (!open.value) return
+  open.value = false
+  if (restore) restoreScrollToSelf()
+}
+
+function toggle() {
+  // si va a cerrar, usamos el cierre controlado (con restore en móvil)
+  if (open.value) {
+    closeScene({ restore: true })
+  } else {
+    open.value = true
+  }
+}
+
 /* ---------- comportamiento de navegación ---------- */
 
 function goNext() {
@@ -210,8 +242,8 @@ function goNext() {
   const next = cards[idx + 1]
   if (!next) return
 
-  // cerrar la escena actual
-  open.value = false
+  // cerrar la escena actual SIN restaurar scroll (porque vamos a la siguiente)
+  closeScene({ restore: false })
 
   const isMobile =
     typeof window !== 'undefined' &&
@@ -223,24 +255,19 @@ function goNext() {
     const topDoc = rect.top + window.pageYOffset
 
     if (isMobile) {
-      // 📱 MÓVIL: scroll suave + fade-in ligero de la siguiente escena
-
       const header = document.querySelector('.site-header, header')
       const headerH = header?.offsetHeight || 0
       const pad = Math.max(16, window.innerHeight * 0.06)
       const targetY = Math.max(0, topDoc - headerH - pad)
 
-      // estado inicial del fade-in
       next.style.opacity = '0'
       next.style.transform = 'translateY(28px)'
       next.style.transition =
         'opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1), ' +
         'transform 0.55s cubic-bezier(0.22, 1, 0.36, 1)'
 
-      // lanzamos el scroll
       smoothScrollTo(targetY, { duration: 650 })
 
-      // en el siguiente frame, activamos la animación hacia el estado normal
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           next.style.opacity = '1'
@@ -251,11 +278,9 @@ function goNext() {
       return
     }
 
-    // 💻 ESCRITORIO: centramos la siguiente escena en el viewport
     const cardCenterDoc = topDoc + rect.height / 2
     const viewportCenter = window.innerHeight / 2
     const targetY = cardCenterDoc - viewportCenter
-
     smoothScrollTo(targetY, { duration: 900 })
   })
 }
@@ -279,32 +304,22 @@ function stopSceneAudio() {
 
 function toggleSceneAudio() {
   if (!sceneAudio.value) return
-  if (sceneAudioPlaying.value) {
-    stopSceneAudio()
-  } else {
-    playSceneAudio()
-  }
+  if (sceneAudioPlaying.value) stopSceneAudio()
+  else playSceneAudio()
 }
 
 watch(
   open,
   (isNowOpen) => {
     if (isNowOpen) {
-      if (props.audioSrc) {
-        playSceneAudio()
-      }
+      if (props.audioSrc) playSceneAudio()
 
-      if (props.isFinal) {
+      if (props.isFinal)
         window.dispatchEvent(new CustomEvent('final-scene-open'))
-      } else {
-        window.dispatchEvent(new CustomEvent('scene-opened'))
-      }
+      else window.dispatchEvent(new CustomEvent('scene-opened'))
     } else {
       stopSceneAudio()
-
-      if (!props.isFinal) {
-        window.dispatchEvent(new CustomEvent('scene-closed'))
-      }
+      if (!props.isFinal) window.dispatchEvent(new CustomEvent('scene-closed'))
     }
   },
   { immediate: false },
