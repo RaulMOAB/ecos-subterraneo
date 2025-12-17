@@ -6,6 +6,7 @@
       `scene-card--${layout}`,
     ]"
     :data-side="layout"
+    :data-final="isFinal ? 'true' : null"
     ref="cardRef"
   >
     <!-- IMAGEN (SIEMPRE IGUAL) -->
@@ -18,7 +19,6 @@
         decoding="async"
       />
 
-      <!-- 🔊 BOTÓN DE AUDIO EN LA ESQUINA SUPERIOR DERECHA DE LA IMAGEN -->
       <button
         v-if="audioSrc && open"
         type="button"
@@ -53,27 +53,25 @@
         <h3 class="scene-title">{{ title }}</h3>
       </header>
 
-      <!-- ⬇️ AQUÍ APLICAMOS EL FORMATEO -->
       <div class="scene-desc" v-html="formattedDescription"></div>
-
-      <div class="scene-actions">
-        <button class="sc-btn sc-ghost" type="button" @click="open = false">
-          Ocultar descripción
-        </button>
-
-        <!-- En la última escena NO mostramos "Seguir" -->
-        <button
-          v-if="!isLast"
-          class="sc-btn sc-primary"
-          type="button"
-          @click="goNext"
-        >
-          Seguir
-        </button>
-      </div>
     </section>
 
-    <!-- AUDIO AMBIENTAL DE LA ESCENA -->
+    <!-- ⬇️ BOTONES ABAJO Y CENTRADOS (cuando está abierta) -->
+    <div v-if="open" class="scene-actions">
+      <button class="sc-btn sc-ghost" type="button" @click="open = false">
+        Ocultar descripción
+      </button>
+
+      <button
+        v-if="!isLast"
+        class="sc-btn sc-primary"
+        type="button"
+        @click="goNext"
+      >
+        Seguir
+      </button>
+    </div>
+
     <audio v-if="audioSrc" ref="sceneAudio" :src="audioSrc" loop></audio>
   </article>
 </template>

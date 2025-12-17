@@ -83,7 +83,7 @@
 .gallery-footer.is-visible::before {
   content: '';
   position: absolute;
-  top: -20px;
+  top: -44px;
   left: 50%;
   transform: translateX(-50%);
   width: 4px;

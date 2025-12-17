@@ -84,5 +84,6 @@ Frente a esta figura desgarrada, el viajero comprende que la compasión y el deb
 Porque los hilos que manejan al Monarca no terminan en él: se pierden en lo alto, donde algo inmenso aguarda, paciente, a que la historia continúe su plegaria.`,
     image: img5,
     alt: 'Batalla final en el altar',
+    isFinal: true,
   },
 ]

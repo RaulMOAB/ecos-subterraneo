@@ -2,9 +2,11 @@
    VARIABLES
    ========================================================= */
 :root {
-  --row-gap: clamp(80px, 12vh, 160px);
+  /* ⬅ MÁS SEPARACIÓN ENTRE ESCENAS (ANTES: clamp(120px, 16vh, 220px)) */
+  --row-gap: clamp(180px, 26vh, 420px);
+
   --side-gutter: clamp(24px, 5vw, 64px);
-  --card-max: min(750px, 94vw);
+  --card-max: min(1040px, 96vw);
   --media-ratio: 4 / 3;
 }
 
@@ -24,7 +26,10 @@ body[data-hero-stage='gallery'] .path-trail-wrapper {
 .scene-gallery {
   display: grid;
   grid-template-columns: 1fr;
+
+  /* ⬅ separación real */
   row-gap: var(--row-gap);
+
   padding-inline: var(--side-gutter);
   width: 100%;
   justify-items: stretch;
@@ -37,7 +42,8 @@ body[data-hero-stage='gallery'] .path-trail-wrapper {
 .scene-card {
   width: 100%;
   max-width: var(--card-max);
-  margin-top: 2rem;
+  margin-top: 0;
+
   display: grid;
   grid-template-columns: 1fr;
   gap: clamp(14px, 2vw, 18px);
@@ -49,14 +55,40 @@ body[data-hero-stage='gallery'] .path-trail-wrapper {
   .scene-card:nth-child(odd) {
     justify-self: start;
   }
+
   .scene-card:nth-child(even) {
     justify-self: end;
   }
+
   .scene-card.is-center {
     justify-self: center;
   }
+
+  /* 🔓 EXPANSIÓN DE LA CARD AL ABRIRSE */
+  .scene-card.is-open {
+    max-width: min(1400px, 98vw); /* ⬅ más grande solo en abierto */
+
+    grid-template-columns:
+      minmax(clamp(440px, 42vw, 760px), 1.2fr) /* imagen */
+      minmax(380px, 0.8fr); /* texto */
+
+    column-gap: clamp(48px, 6vw, 80px);
+  }
+
+  /* ⬅ más aire al final del viaje */
   .scene-card:last-child {
-    margin-bottom: 8rem;
+    margin-bottom: clamp(160px, 30vh, 320px);
+  }
+
+  /* La imagen SIEMPRE rellena su columna */
+  .scene-card.is-open .scene-media {
+    width: 94%;
+    justify-self: center;
+  }
+
+  /* El texto puede encogerse sin romper el grid */
+  .scene-card.is-open .scene-details {
+    min-width: 0;
   }
 }
 
@@ -249,7 +281,7 @@ body[data-hero-stage='gallery'] .path-trail-wrapper {
    ========================================================= */
 .scene-card.is-open {
   padding: clamp(18px, 2.5vw, 26px);
-  margin-top: 4rem;
+  margin-top: 0;
   gap: clamp(22px, 3vw, 32px);
   border-radius: 20px;
 
@@ -285,11 +317,92 @@ body[data-hero-stage='gallery'] .path-trail-wrapper {
 .scene-card.is-open .scene-media {
   box-shadow: none;
 }
+
+/* =========================================================
+   LAYOUT LATERAL EN ABIERTO (ESCENAS 1–4) + ÚLTIMA INTACTA
+   Requiere que .scene-actions esté fuera de .scene-details en el template
+   ========================================================= */
+@media (min-width: 900px) {
+  /* 2 columnas + fila inferior para acciones */
+  .scene-card.is-open {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr; /* imagen / texto */
+    grid-template-rows: auto auto;
+    column-gap: clamp(24px, 4vw, 48px);
+    row-gap: clamp(18px, 2.5vh, 28px);
+    align-items: start;
+  }
+
+  .scene-card.is-open:nth-child(even) {
+    display: grid;
+    grid-template-columns: 38% 62%;
+    grid-template-rows: auto auto;
+    column-gap: clamp(24px, 4vw, 48px);
+    row-gap: clamp(18px, 2.5vh, 28px);
+    align-items: start;
+  }
+
+  /* base: imagen izq, texto der */
+  .scene-card.is-open .scene-media {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .scene-card.is-open:not([data-final='true']) .scene-media > img {
+    max-width: 753px;
+  }
+
+  .scene-card.is-open .scene-details {
+    grid-column: 2;
+    grid-row: 1;
+    margin-top: 2rem;
+  }
+
+  .scene-card.is-open:not([data-final='true']) .scene-details {
+    max-width: 519px;
+  }
+
+  /* acciones abajo y centradas ocupando todo el ancho */
+  .scene-card.is-open .scene-actions {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    /* justify-content: center;*/
+    padding-top: 2rem;
+  }
+  .scene-card.is-open:not([data-final='true']) .scene-actions {
+    justify-content: center;
+  }
+
+  /* alternancia: escenas 2 y 4 */
+  .scene-card.is-open:nth-child(even) .scene-media {
+    max-width: 775px;
+    grid-column: 2;
+    margin-right: 8rem;
+  }
+  .scene-card.is-open:nth-child(even) .scene-details {
+    grid-column: 1;
+  }
+
+  .scene-card.is-open:nth-child(even) .scene-details {
+    margin-left: 2rem;
+  }
+
+  /* 🔒 última escena no cambia (usa el layout original) */
+  .scene-card.is-open[data-final='true'] {
+    display: block;
+  }
+
+  /* legibilidad del texto en lateral */
+  .scene-card.is-open:not([data-final='true']) .scene-desc {
+    max-width: 52ch;
+  }
+}
+
 .path-trail-wrapper {
-  position: fixed; /* o absolute si lo tienes así, pero fija en viewport suele ir mejor */
+  position: fixed;
   inset: 0;
   pointer-events: none;
-  z-index: 5; /* ⬅ por debajo de .hero-wrapper (20) */
+  z-index: 5;
   transition: opacity 0.2s linear;
 }
 
@@ -308,36 +421,34 @@ body[data-hero-stage='gallery'] .path-trail-wrapper {
 
 /* ===== Ajustes móviles ===== */
 @media (max-width: 640px) {
-  /* La galería pasa a ser una columna con gap controlado */
   .scene-gallery {
     display: flex;
     flex-direction: column;
-    gap: 4rem; /* distancia real entre articles */
+
+    gap: 6rem;
+    padding-block: 4rem;
   }
 
-  /* Cada article ocupa todo el ancho y SIN márgenes propios */
   .scene-card {
     padding: 0;
     padding-top: 2rem;
-    margin: top 2rem;
     margin: 0 !important;
     width: 100%;
   }
+
   .scene-card.is-open {
-    margin-top: 2rem !important;
-  }
-  /* Un pequeño espacio sólo al final de la lista */
-  .scene-card:last-child {
-    margin-bottom: 1.5rem !important;
+    margin-top: 0 !important;
   }
 
-  /* El contenedor de la imagen sin paddings y con poco espacio hacia el CTA */
+  .scene-card:last-child {
+    margin-bottom: 2rem !important;
+  }
+
   .scene-card .scene-media {
     padding: 0;
     margin: 0 0 0.6rem;
   }
 
-  /* La imagen ocupa exactamente el ancho, sin espacios laterales */
   .scene-card .scene-media .scene-img {
     width: 100%;
     display: block;
@@ -345,7 +456,6 @@ body[data-hero-stage='gallery'] .path-trail-wrapper {
     border-radius: 1rem;
   }
 
-  /* CTA más compacto para reducir altura entre escenas */
   .scene-card .scene-cta {
     padding-block: 0.6rem;
     padding-inline: 1.4rem;
