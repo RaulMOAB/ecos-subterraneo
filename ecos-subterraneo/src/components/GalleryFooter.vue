@@ -4,7 +4,7 @@
     :class="{ 'is-visible': isVisible }"
     ref="footerRef"
   >
-    <!-- pequeño círculo brillante -->
+    <!-- círculo brillante -->
     <div class="footer-core"></div>
 
     <p class="gallery-footer__text">

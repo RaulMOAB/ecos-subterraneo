@@ -19,7 +19,7 @@ body[data-final-battle='true'] {
   --cursor-gold-soft: hsla(275, 80%, 55%, 0.4);
   --cursor-gold-secondary: hsla(285, 80%, 60%, 0.55);
 }
-/* Reset mínimo */
+
 *,
 *::before,
 *::after {
@@ -34,28 +34,26 @@ body {
   margin: 0;
   padding: 0;
   font-family: var(--font-sans);
-  font-size: 16px;
+  font-size: 20px;
   line-height: 1.6;
-  background:
-    /* 1. Halo frío superior (luz lejana) */ radial-gradient(
+  background: radial-gradient(
       circle at 50% 8%,
       rgba(120, 180, 255, 0.2),
       transparent 55%
     ),
-    /* 3. Degradado abisal: cuanto más abajo, más oscuro */
-      linear-gradient(
-        to bottom,
-        rgba(0, 0, 0, 0.65) 0%,
-        rgba(0, 0, 0, 0.8) 40%,
-        rgba(0, 0, 0, 0.92) 70%,
-        rgba(0, 0, 0, 1) 100%
-      ),
-    /* Capa 1: la imagen base */ url('../src/assets/fondo.svg');
+    linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.65) 0%,
+      rgba(0, 0, 0, 0.8) 40%,
+      rgba(0, 0, 0, 0.92) 70%,
+      rgba(0, 0, 0, 1) 100%
+    ),
+    url('../src/assets/fondo.svg');
 
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center top;
-  background-attachment: fixed; /* efecto sutil tipo parallax */
+  background-attachment: fixed; /* parallax suave */
 }
 
 html,
@@ -116,7 +114,7 @@ button,
 }
 
 /* Halo principal */
-/* --- CURSOR MÁGICO GLOBAL --- */
+/* --- CURSOR --- */
 .magic-cursor {
   position: fixed;
   top: 0;
@@ -142,13 +140,12 @@ button,
   transition: opacity 0.25s ease, transform 0.08s ease-out, filter 0.25s ease;
 }
 
-/* Modo interactivo (sobre links/botones) */
 .magic-cursor.is-interactive {
   filter: blur(14px) brightness(1.2);
   transform: translate(-50%, -50%) scale(1.2);
 }
 
-/* Halo secundario (respiración suave) */
+/* Halo secundario */
 .magic-cursor::after {
   content: '';
   position: absolute;
@@ -169,7 +166,7 @@ button,
   animation: magicPulseSecondary 3s ease-in-out infinite;
 }
 
-/* Partículas / chispas mágicas */
+/* Partículas  */
 .magic-spark {
   position: fixed;
   width: 6px;
@@ -220,25 +217,23 @@ button,
 /* ===== Ajustes móviles ===== */
 @media (max-width: 640px) {
   body {
-    background:
-      /* Más oscuridad en la parte baja en móviles */ linear-gradient(
+    background: linear-gradient(
         to bottom,
         rgba(0, 0, 0, 0.75) 0%,
         rgba(0, 0, 0, 0.9) 45%,
         rgba(0, 0, 0, 0.98) 100%
       ),
-      /* Reforzamos el tinte frío pero suave */
-        radial-gradient(
-          circle at 50% 10%,
-          rgba(120, 180, 255, 0.18),
-          transparent 55%
-        ),
+      radial-gradient(
+        circle at 50% 10%,
+        rgba(120, 180, 255, 0.18),
+        transparent 55%
+      ),
       url('../src/assets/fondo.svg');
 
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center top;
-    background-attachment: scroll; /* en móvil mejor evitar fixed para rendimiento */
+    background-attachment: scroll; /* sin parallax en móvil */
   }
   /* La card ocupa todo el ancho y las escenas quedan más juntas */
   .scene-card {
@@ -246,16 +241,14 @@ button,
     margin-left: 0;
     margin-right: 0;
     /*width: 100%;*/
-    margin-bottom: 1.4rem; /* separa pero mucho menos que antes */
+    margin-bottom: 1.4rem;
   }
 
-  /* El contenedor de la imagen sin paddings y con poco espacio hacia el CTA */
   .scene-card .scene-media {
     padding: 0;
     margin: 0 0 0.8rem;
   }
 
-  /* La imagen ocupa exactamente el ancho, sin espacios laterales */
   .scene-card .scene-media .scene-img {
     width: 100%;
     display: block;
@@ -263,7 +256,7 @@ button,
     border-radius: 1rem;
   }
 
-  /* CTA más compacto para reducir altura entre escenas */
+  /* CTA más compacto */
   .scene-card .scene-cta {
     padding-block: 0.6rem;
     padding-inline: 1.4rem;

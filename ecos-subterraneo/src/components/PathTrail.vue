@@ -1,7 +1,7 @@
 <template>
   <div class="path-layer">
     <svg ref="svgEl" class="scene-path" xmlns="http://www.w3.org/2000/svg">
-      <!-- TRONCO: desde el final del intro hasta justo antes de la última escena -->
+      <!-- TRONCO desde el final del intro hasta justo antes de la última escena -->
       <line
         class="scene-path-trunk"
         :x1="trunkX"
@@ -13,7 +13,7 @@
         stroke-linecap="round"
       />
 
-      <!-- RAMAS: una por cada escena -->
+      <!-- BIFURCACIÓN RAMAS una por cada escena -->
       <path
         v-for="(branch, index) in branches"
         :key="index"
@@ -28,7 +28,7 @@
         stroke-linejoin="round"
       />
 
-      <!-- ABEJA recorriendo el tronco -->
+      <!-- ABEJA  -->
       <g
         v-if="hasTrunk"
         class="scene-path-bee"
@@ -55,7 +55,6 @@
 import { defineExpose } from 'vue'
 import { usePathTrail } from './pathTrail.js'
 
-// usamos el hook optimizado
 const api = usePathTrail()
 
 const {
@@ -74,13 +73,10 @@ const {
   onBeeEnter,
   onBeeLeave,
   onBeeClick,
-  // nuevos métodos opcionales
   recalcGeometry,
   recalcOnScroll,
 } = api
 
-// opcional: exponemos estos métodos al padre para que pueda
-// forzar un recálculo cuando abras/cierres escenas
 defineExpose({
   recalcGeometry,
   recalcOnScroll,

@@ -35,7 +35,7 @@ import scene3Audio from '@/assets/audio/scene3.wav'
 import scene4Audio from '@/assets/audio/scene4.wav'
 import scene5Audio from '@/assets/audio/final_battle.mp3'
 
-// Array paralelo de audios, en el mismo orden que las escenas
+// Array de audios para las escenas
 const sceneAudios = [
   scene1Audio,
   scene2Audio,
@@ -47,7 +47,7 @@ const sceneAudios = [
 const cardsObserver = ref(null)
 
 onMounted(() => {
-  // Seguridad: solo en entorno navegador
+  // solo en navegador
   if (typeof window === 'undefined') return
 
   const cards = document.querySelectorAll('.scene-card')
@@ -58,7 +58,6 @@ onMounted(() => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
           entry.target.classList.add('visible')
-          // Una vez visible, dejamos de observar esa card
           observer.unobserve(entry.target)
         }
       })
@@ -82,13 +81,12 @@ const props = defineProps({
   items: { type: Array, default: null },
 })
 
-// Escenas base: vienen de props o de scenesData
+// Escenas base
 const galleryScenes = computed(() => props.items ?? defaultScenes)
 
 /**
- * 2) Combinamos escenas + audios
- *    - audioSrc: la pista que usará SceneCard
- *    - isFinal: true solo en la última escena
+ *  Combinamos escenas + audios
+ *    devolviendo un nuevo array con la propiedad audioSrc añadida
  */
 const scenesWithAudio = computed(() =>
   galleryScenes.value.map((scene, index, arr) => ({

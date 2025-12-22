@@ -22,7 +22,7 @@ export function usePathTrail() {
   let isBeeAutoFlying = false
   let freezeBeeAtEnd = false
 
-  // control para throttling del scroll con requestAnimationFrame
+  // control
   let ticking = false
 
   // mostrar abeja solo cuando el tronco tiene longitud
@@ -32,12 +32,11 @@ export function usePathTrail() {
   const INTRO_SELECTOR = '.hero-intro-panel'
 
   // margen para que el tronco NO llegue al final de la última escena
-  const TRUNK_BOTTOM_MARGIN = -500 // ajusta si quieres más/menos “aire”
+  const TRUNK_BOTTOM_MARGIN = -500
 
   const getSceneCards = () =>
     Array.from(document.querySelectorAll('.scene-card'))
 
-  // 🔹 NUEVO: índice de la rama asociada a la card abierta (is-open)
   const getOpenBranchIndex = () => {
     const cards = getSceneCards()
     if (!cards.length || !branches.value.length) return -1
@@ -51,7 +50,7 @@ export function usePathTrail() {
   }
 
   /**
-   * Calcula dónde debe empezar el tronco: justo después del heroIntroPanel.
+   * Calcula dónde debe empezar el tronco (justo después del heroIntroPanel)
    */
   const computeTrunkStart = () => {
     const svg = svgEl.value
@@ -71,14 +70,13 @@ export function usePathTrail() {
     const introRect = intro.getBoundingClientRect()
     let y = introRect.bottom - svgRect.top
 
-    // clamp al alto del SVG
     y = Math.max(0, Math.min(y, svgRect.height))
     trunkStart.value = y
   }
 
   /**
    * Construye las ramas y fija trunkEnd sin atravesar la última escena.
-   * Guarda también topDoc/bottomDoc para no recalcular geometría en cada scroll.
+   * Guarda topDoc/bottomDoc para no recalcular geometría en cada scroll.
    */
   const buildBranches = () => {
     const svg = svgEl.value
@@ -112,7 +110,6 @@ export function usePathTrail() {
 
       if (bottomSvg > lastBottomSvg) lastBottomSvg = bottomSvg
 
-      // bordes reales de la imagen (o del card como fallback)
       const img = card.querySelector('.scene-img')
       const imgRect = (img || card).getBoundingClientRect()
 
@@ -135,7 +132,7 @@ export function usePathTrail() {
 
       const d = `M ${trunkXsvg} ${ySvg} L ${endX} ${ySvg}`
 
-      // coordenadas en sistema de documento
+      // coordenadas en el documento
       const topDoc = rect.top + scrollY
       const bottomDoc = rect.bottom + scrollY
 
@@ -152,8 +149,8 @@ export function usePathTrail() {
     // cálculo base de la longitud del tronco
     let endY = lastBottomSvg - TRUNK_BOTTOM_MARGIN
 
-    // recorte suave para integrar el footer
     const footer = document.querySelector('.gallery-footer')
+
     if (footer) {
       const footerRect = footer.getBoundingClientRect()
       const svgRect2 = svgEl.value.getBoundingClientRect()
@@ -170,9 +167,7 @@ export function usePathTrail() {
     trunkEnd.value = Math.max(trunkStart.value + endY)
   }
 
-  /**
-   * Rama activa: escena cuyo topDoc <= centro del viewport (documento) <= bottomDoc.
-   */
+  //rama activa según scroll
   const updateActiveBranch = () => {
     if (!branches.value.length) {
       visibleBranchIndex.value = -1
@@ -197,22 +192,20 @@ export function usePathTrail() {
   }
 
   /**
-   * Posición de la abeja (scroll-driven).
-   * Con lógica de bucle al volver al inicio.
-   * 🔹 Ajuste: si hay una card abierta, la abeja se queda en la rama bifurcada de esa escena.
+   *  Si hay una card abierta, la abeja se queda en la rama bifurcada de esa escena.
    */
   const updateBeePosition = () => {
     const svg = svgEl.value
     if (!svg) return
 
-    // si está en animación automática, no la tocamos
+    // si está en animación automática, no se toca
     if (isBeeAutoFlying) return
 
     const currentScrollY = window.scrollY || window.pageYOffset
 
-    // si está congelada al final, mantenerla fija...
+    // si está congelada al final, mantenerla fija
     if (freezeBeeAtEnd) {
-      // ... salvo que el usuario haya vuelto arriba: reinicio implícito
+      // si el usuario ha vuelto arriba: reinicio del vuelo
       if (currentScrollY < 200) {
         freezeBeeAtEnd = false
         beeX.value = trunkX.value
@@ -234,13 +227,12 @@ export function usePathTrail() {
     const viewportCenter = window.innerHeight / 2
     let ySvg = viewportCenter - svgRect.top
 
-    // 🔹 Si hay una card abierta, forzamos la Y de la rama correspondiente
+    // Si hay una card abierta, forzamos la Y de la rama correspondiente
     const openBranchIdx = getOpenBranchIndex()
     if (openBranchIdx >= 0 && branches.value[openBranchIdx]) {
       ySvg = branches.value[openBranchIdx].ySvg
     }
 
-    // limitar al rango del tronco
     ySvg = Math.max(trunkStart.value, Math.min(ySvg, trunkEnd.value))
 
     // inclinación según cambio de scroll
@@ -251,7 +243,6 @@ export function usePathTrail() {
     const clamped = Math.max(-maxDelta, Math.min(maxDelta, delta))
     beeAngle.value = (clamped / maxDelta) * 15
 
-    // intensidad del glow en función de la velocidad
     const speed = Math.min(1, Math.abs(delta) / 40)
     const intensity = 0.4 + speed * 0.5
     svg.style.setProperty('--path-glow-intensity', intensity.toString())
@@ -286,13 +277,13 @@ export function usePathTrail() {
     if (!svg) return
     if (trunkEnd.value <= trunkStart.value) return
 
-    // cancelar animación previa si la hubiera
+    // cancelar animación previa
     if (autoFlyAnimationId) {
       cancelAnimationFrame(autoFlyAnimationId)
       autoFlyAnimationId = null
     }
 
-    // por robustez: aseguramos que puede volar aunque antes estuviera congelada
+    //control de estado
     isBeeAutoFlying = false
     freezeBeeAtEnd = false
 
@@ -333,13 +324,12 @@ export function usePathTrail() {
 
   /**
    * Reinicia la abeja para un nuevo recorrido desde el inicio del tronco.
-   * (si disparas el evento 'bee-restart' desde el footer, por ejemplo)
    */
   const resetBeeForNewRun = () => {
     const svg = svgEl.value
     if (!svg) return
 
-    // cancelar animación pendiente
+    // cancelar animación
     if (autoFlyAnimationId) {
       cancelAnimationFrame(autoFlyAnimationId)
       autoFlyAnimationId = null
@@ -360,25 +350,16 @@ export function usePathTrail() {
     updateActiveBranch()
   }
 
-  /**
-   * Recalcula solo la geometría (tronco + ramas).
-   */
   const recalcGeometry = () => {
     computeTrunkStart()
     buildBranches()
   }
 
-  /**
-   * Recalcula lo que depende del scroll:
-   * - rama activa
-   * - posición/ángulo de la abeja
-   * - dispara el vuelo automático al llegar al final (bucle)
-   */
   const recalcOnScroll = () => {
     updateActiveBranch()
     updateBeePosition()
 
-    // NUEVO: si hemos llegado al final de la última escena, disparar vuelo
+    // si hemos llegado al final de la última escena, trigger del vuelo
     if (!branches.value.length) return
     if (isBeeAutoFlying || freezeBeeAtEnd) return
 
@@ -391,9 +372,6 @@ export function usePathTrail() {
     }
   }
 
-  /**
-   * Listener de scroll envuelto en requestAnimationFrame.
-   */
   const onScrollRaf = () => {
     if (!ticking) {
       ticking = true
@@ -427,7 +405,6 @@ export function usePathTrail() {
   }
 
   const onFooterVisible = () => {
-    // sigue existiendo por compatibilidad, pero ya no dependes solo de él
     flyBeeToFooter()
   }
 

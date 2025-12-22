@@ -6,7 +6,6 @@
   padding-inline: clamp(12px, 3vw, 16px);
 }
 
-/* Caja visible cuando está abierto */
 .gi-panel[data-open='true'] .gi-wrap {
   opacity: 1;
   transform: translateY(0);
@@ -64,7 +63,7 @@
   cursor: pointer;
 }
 
-/* Grid interno */
+/* Grid */
 .gi-grid {
   display: grid;
   gap: clamp(14px, 3vw, 20px);
@@ -77,7 +76,6 @@
   }
 }
 
-/* Figura izquierda */
 .gi-figure {
   display: grid;
   place-items: center;
@@ -144,7 +142,6 @@
   border-color: rgba(140, 180, 255, 0.45);
 }
 
-/* Barra “reabrir” cuando está colapsado */
 .gi-reopen {
   margin-top: 10px;
   width: 100%;

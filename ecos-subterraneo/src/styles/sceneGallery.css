@@ -2,20 +2,18 @@
    VARIABLES
    ========================================================= */
 :root {
-  /* ⬅ MÁS SEPARACIÓN ENTRE ESCENAS (ANTES: clamp(120px, 16vh, 220px)) */
   --row-gap: clamp(180px, 26vh, 420px);
-
   --side-gutter: clamp(24px, 5vw, 64px);
   --card-max: min(1040px, 96vw);
   --media-ratio: 4 / 3;
 }
 
-/* Mientras está el hero, ocultamos path + abeja */
+/* Mientras está en el hero ocultamos path y abeja */
 body[data-hero-stage='intro'] .path-trail-wrapper {
   opacity: 0;
 }
 
-/* Una vez el usuario está en la galería, mostramos el path */
+/* Una vez el usuario está en la galería, se muestra el path */
 body[data-hero-stage='gallery'] .path-trail-wrapper {
   opacity: 1;
 }
@@ -26,10 +24,7 @@ body[data-hero-stage='gallery'] .path-trail-wrapper {
 .scene-gallery {
   display: grid;
   grid-template-columns: 1fr;
-
-  /* ⬅ separación real */
   row-gap: var(--row-gap);
-
   padding-inline: var(--side-gutter);
   width: 100%;
   justify-items: stretch;
@@ -43,14 +38,13 @@ body[data-hero-stage='gallery'] .path-trail-wrapper {
   width: 100%;
   max-width: var(--card-max);
   margin-top: 0;
-
   display: grid;
   grid-template-columns: 1fr;
   gap: clamp(14px, 2vw, 18px);
   position: relative;
 }
 
-/* Zig-zag por alineación */
+/* Zig-zag  */
 @media (min-width: 900px) {
   .scene-card:nth-child(odd) {
     justify-self: start;
@@ -64,29 +58,23 @@ body[data-hero-stage='gallery'] .path-trail-wrapper {
     justify-self: center;
   }
 
-  /* 🔓 EXPANSIÓN DE LA CARD AL ABRIRSE */
   .scene-card.is-open {
-    max-width: min(1400px, 98vw); /* ⬅ más grande solo en abierto */
-
+    max-width: min(1400px, 98vw);
     grid-template-columns:
-      minmax(clamp(440px, 42vw, 760px), 1.2fr) /* imagen */
-      minmax(380px, 0.8fr); /* texto */
-
+      minmax(clamp(440px, 42vw, 760px), 1.2fr)
+      minmax(380px, 0.8fr);
     column-gap: clamp(48px, 6vw, 80px);
   }
 
-  /* ⬅ más aire al final del viaje */
   .scene-card:last-child {
     margin-bottom: clamp(160px, 30vh, 320px);
   }
 
-  /* La imagen SIEMPRE rellena su columna */
   .scene-card.is-open .scene-media {
     width: 94%;
     justify-self: center;
   }
 
-  /* El texto puede encogerse sin romper el grid */
   .scene-card.is-open .scene-details {
     min-width: 0;
   }
@@ -277,14 +265,13 @@ body[data-hero-stage='gallery'] .path-trail-wrapper {
 }
 
 /* =========================================================
-   CARD ABIERTA (GLASS OPACO ENMARCA IMAGEN + TEXTO)
+   CARD ABIERTA 
    ========================================================= */
 .scene-card.is-open {
   padding: clamp(18px, 2.5vw, 26px);
   margin-top: 0;
   gap: clamp(22px, 3vw, 32px);
   border-radius: 20px;
-
   border: 1px solid rgba(140, 180, 255, 0.12);
   background: linear-gradient(
       180deg,
@@ -304,7 +291,6 @@ body[data-hero-stage='gallery'] .path-trail-wrapper {
   transition: filter 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* El recuadro pasa a ser toda la card; el panel interior se limpia */
 .scene-card.is-open .scene-details {
   margin-top: 0;
   padding: 0;
@@ -313,20 +299,14 @@ body[data-hero-stage='gallery'] .path-trail-wrapper {
   box-shadow: none;
 }
 
-/* En abierto, la sombra la pone la card, no la imagen */
 .scene-card.is-open .scene-media {
   box-shadow: none;
 }
 
-/* =========================================================
-   LAYOUT LATERAL EN ABIERTO (ESCENAS 1–4) + ÚLTIMA INTACTA
-   Requiere que .scene-actions esté fuera de .scene-details en el template
-   ========================================================= */
 @media (min-width: 900px) {
-  /* 2 columnas + fila inferior para acciones */
   .scene-card.is-open {
     display: grid;
-    grid-template-columns: 1.2fr 0.8fr; /* imagen / texto */
+    grid-template-columns: 1.2fr 0.8fr;
     grid-template-rows: auto auto;
     column-gap: clamp(24px, 4vw, 48px);
     row-gap: clamp(18px, 2.5vh, 28px);
@@ -342,7 +322,6 @@ body[data-hero-stage='gallery'] .path-trail-wrapper {
     align-items: start;
   }
 
-  /* base: imagen izq, texto der */
   .scene-card.is-open .scene-media {
     grid-column: 1;
     grid-row: 1;
@@ -362,7 +341,6 @@ body[data-hero-stage='gallery'] .path-trail-wrapper {
     max-width: 519px;
   }
 
-  /* acciones abajo y centradas ocupando todo el ancho */
   .scene-card.is-open .scene-actions {
     grid-column: 1 / -1;
     grid-row: 2;
@@ -373,7 +351,6 @@ body[data-hero-stage='gallery'] .path-trail-wrapper {
     justify-content: center;
   }
 
-  /* alternancia: escenas 2 y 4 */
   .scene-card.is-open:nth-child(even) .scene-media {
     max-width: 775px;
     grid-column: 2;
@@ -387,12 +364,11 @@ body[data-hero-stage='gallery'] .path-trail-wrapper {
     margin-left: 2rem;
   }
 
-  /* 🔒 última escena no cambia (usa el layout original) */
+  /* última escena  */
   .scene-card.is-open[data-final='true'] {
     display: block;
   }
 
-  /* legibilidad del texto en lateral */
   .scene-card.is-open:not([data-final='true']) .scene-desc {
     max-width: 52ch;
   }

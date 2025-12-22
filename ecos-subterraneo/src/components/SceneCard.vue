@@ -9,7 +9,6 @@
     :data-final="isFinal ? 'true' : null"
     ref="cardRef"
   >
-    <!-- IMAGEN (SIEMPRE IGUAL) -->
     <figure class="scene-media" @click="toggle">
       <img
         :src="image"
@@ -39,14 +38,12 @@
       </button>
     </figure>
 
-    <!-- CTA CUANDO ESTÁ CERRADA -->
     <div v-if="!open" class="scene-controls">
       <button class="scene-cta" type="button" @click="toggle">
         {{ ctaLabel || 'Explorar escena' }}
       </button>
     </div>
 
-    <!-- PANEL DE DESCRIPCIÓN CUANDO ESTÁ ABIERTA -->
     <section v-else class="scene-details">
       <header class="scene-header">
         <p v-if="kicker" class="scene-kicker">{{ kicker }}</p>
@@ -56,7 +53,6 @@
       <div class="scene-desc" v-html="formattedDescription"></div>
     </section>
 
-    <!-- ⬇️ BOTONES ABAJO Y CENTRADOS (cuando está abierta) -->
     <div v-if="open" class="scene-actions">
       <button class="sc-btn sc-ghost" type="button" @click="closeScene()">
         Ocultar descripción
@@ -101,7 +97,6 @@ const cardRef = ref(null)
 const sceneAudio = ref(null)
 const sceneAudioPlaying = ref(false)
 
-// 🔊 volumen
 const SCENE_VOLUME_NORMAL = 0.35
 const SCENE_VOLUME_FINAL = 0.9
 
@@ -112,7 +107,7 @@ function applySceneVolume() {
     : SCENE_VOLUME_NORMAL
 }
 
-// 📝 descripción formateada
+// descripciones formateadas
 const formattedDescription = computed(() => {
   if (!props.description) return ''
   return (
@@ -125,7 +120,7 @@ const formattedDescription = computed(() => {
   )
 })
 
-// ¿es la última escena?
+// comprobar si es la última escena
 const isLast = computed(() => {
   const card = cardRef.value
   if (!card) return false
@@ -187,7 +182,7 @@ function smoothScrollTo(targetY, { duration = 900 } = {}) {
   requestAnimationFrame(raf)
 }
 
-/* ---------- NUEVO: cerrar y restaurar scroll en móvil ---------- */
+/* ---------- cerrar y restaurar scroll en móvil ---------- */
 
 async function restoreScrollToSelf() {
   const el = cardRef.value
@@ -200,13 +195,11 @@ async function restoreScrollToSelf() {
 
   if (!isMobile) return
 
-  // Esperamos a que el panel colapse (cambio de altura real del DOM)
   await nextTick()
 
-  // Medimos posición estable tras el colapso
   const topDoc = await waitForStableTop(el)
 
-  // Ajuste para header fijo (si existe) + padding agradable
+  // Ajuste para header fijo  + padding agradable
   const header = document.querySelector('.site-header, header')
   const headerH = header?.offsetHeight || 0
   const pad = Math.max(16, window.innerHeight * 0.06)
@@ -222,7 +215,6 @@ function closeScene({ restore = true } = {}) {
 }
 
 function toggle() {
-  // si va a cerrar, usamos el cierre controlado (con restore en móvil)
   if (open.value) {
     closeScene({ restore: true })
   } else {
@@ -242,7 +234,7 @@ function goNext() {
   const next = cards[idx + 1]
   if (!next) return
 
-  // cerrar la escena actual SIN restaurar scroll (porque vamos a la siguiente)
+  // cerrar la escena actual SIN restaurar scroll
   closeScene({ restore: false })
 
   const isMobile =
