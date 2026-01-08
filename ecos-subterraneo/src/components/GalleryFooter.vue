@@ -4,21 +4,28 @@
     :class="{ 'is-visible': isVisible }"
     ref="footerRef"
   >
-    <!-- círculo brillante -->
     <div class="footer-core"></div>
+    <div class="gallery-footer__inner">
+      <p class="gallery-footer__text">
+        Fin del recorrido · Ecos de lo Subterráneo
+      </p>
 
-    <p class="gallery-footer__text">
-      Fin del recorrido · Ecos de lo Subterráneo
-    </p>
+      <nav class="gallery-footer__actions" aria-label="Navegación final">
+        <button class="gallery-footer__link" @click="scrollToTop">
+          Volver al inicio
+        </button>
 
-    <button class="gallery-footer__button" @click="scrollToTop">
-      Volver al inicio
-    </button>
+        <RouterLink class="gallery-footer__link" to="/about">
+          Sobre mí
+        </RouterLink>
+      </nav>
+    </div>
   </footer>
 </template>
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { RouterLink } from 'vue-router'
 
 const footerRef = ref(null)
 const isVisible = ref(false)
